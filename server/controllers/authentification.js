@@ -44,13 +44,18 @@ exports.auth = (req, res, next) => {
 // Admin Users Route
 //========================================
 exports.adminUsers = (req, res, next) => {
-    let response = {
-        uid : req.user._id,
-        users: {
 
+    User.find(function(err,users){
+        if(err) { return next(err) }
+
+        let response = {
+            user : setUserInfo(req.user),
+            users: users.map(user => setUserInfo(user))
         }
-    }
-    res.json(response)
+
+        res.status(200).send(response)
+
+    })
 }
 
 
@@ -86,7 +91,7 @@ exports.register = (req, res, next) => {
         let user = new User({
             email: email,
             password: password,
-            profile: { fristName: firstName, lastName: lastName },
+            profile: { firstName: firstName, lastName: lastName },
             role: role
         })
 
