@@ -1,7 +1,14 @@
 const express = require('express'),
     app = express(),
+    bodyParser = require('body-parser'),
     logger = require('morgan'),
-    config = require('./config/main')
+    mongoose = require('mongoose')
+    config = require('./config/main'),
+    router = require('./router')
+
+// Data Connection
+mongoose.connect(config.database)
+mongoose.Promise = global.Promise;
 
 // Start the server
 const server = app.listen(config.port)
@@ -18,3 +25,9 @@ app.use((req,res,next) => {
     res.header("Access-Control-Allow-Credentials", "true")
     next()
 })
+
+// Adding Body parser
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+
+router(app)
