@@ -35,6 +35,9 @@ module.exports = app => {
     // Protect dashboard route with JWT
     apiRoutes.get('/dashboard', requireAuth, AuthenticationController.auth)
 
+    // Test Data Home
+    apiRoutes.get('/home', AuthenticationController.publicHome)
+
     // Protect dashboard route with JWT and Admin Role user
     apiRoutes.get('/admin', requireAuth, AuthenticationController.roleAuthorization('Admin'), AuthenticationController.adminUsers)
 
