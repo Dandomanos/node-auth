@@ -1,11 +1,11 @@
-const AuthenticationController = require('./controllers/authentification'),
+const AuthenticationController = require('../controllers/authentification'),
     express = require('express'),
-    passportService = require('./config/passport'),
+    passportService = require('../config/passport'),
     passport = require('passport')
 
 // Middleware to require login/auth
 const requireAuth = passport.authenticate('jwt', { session:false })
-const requireLogin = passport.authenticate('local', { session:false })
+const requireLogin = passport.authenticate('local', { session:false,failureFlash: true })
 
 // Constant for role types
 const REQUIRE_ADMIN = "Admin",
@@ -39,7 +39,7 @@ module.exports = app => {
     apiRoutes.get('/home', AuthenticationController.publicHome)
 
     // Protect dashboard route with JWT and Admin Role user
-    apiRoutes.get('/admin', requireAuth, AuthenticationController.roleAuthorization('Admin'), AuthenticationController.adminUsers)
+    // apiRoutes.get('/admin', requireAuth, AuthenticationController.roleAuthorization('Admin'), AuthenticationController.adminUsers)
 
     // Set url for API group routes
     app.use('/api', apiRoutes)

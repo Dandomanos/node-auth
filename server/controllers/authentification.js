@@ -1,7 +1,9 @@
-const jwt = require('jsonwebtoken'),
-    crypto = require('crypto'),
-    User = require('../models/user')
-    config = require('../config/main')
+const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+const User = require('../models/user')
+const config = require('../config/main')
+const fs = require('fs-extra')
+const path = require('path')
 
 function generateToken(user) {
     return jwt.sign(user,config.secret, {
@@ -28,8 +30,11 @@ exports.login = (req, res, next) => {
     let userInfo = setUserInfo(req.user)
 
     res.status(200).json({
-        token: 'JWT ' + generateToken(userInfo),
-        user: userInfo
+        status:true,
+        data:{
+            token: 'JWT ' + generateToken(userInfo),
+            user: userInfo
+        }
     })
 }
 
@@ -116,25 +121,25 @@ exports.register = (req, res, next) => {
 //========================================
 
 //Role authorization check
-exports.roleAuthorization = role => {
-    return (req, res, next) => {
-        const user = req.user
-        User.findById(user._id, (err, foundUser) => {
-            if(err) {
-                console.log('error', err)
-                res.status(422).json({ error: 'No user was found'})
-            }
+// exports.roleAuthorization = role => {
+//     return (req, res, next) => {
+//         const user = req.user
+//         User.findById(user._id, (err, foundUser) => {
+//             if(err) {
+//                 console.log('error', err)
+//                 res.status(422).json({ error: 'No user was found'})
+//             }
 
-            if(foundUser.role == role) {
-                console.log('foundUser.role', role)
-                return next()
-            }
+//             if(foundUser.role == role) {
+//                 console.log('foundUser.role', role)
+//                 return next()
+//             }
 
-            res.status(401).json({error:'User unauthorized', role: user.role})
-            return next('Unauthorized')
-        })
-    }
-}
+//             res.status(401).json({error:'User unauthorized', role: user.role})
+//             return next('Unauthorized')
+//         })
+//     }
+// }
 
 //Public Home
 exports.publicHome = (req, res, next)  => {

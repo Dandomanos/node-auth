@@ -2,10 +2,10 @@
     <div class="home">
         <img src="../assets/logo.png">
         <div v-if="data">
-          <h1>{{data.title}}</h1>
-          <p>
-            {{data.content}}
-          </p>
+            <h1>{{data.title}}</h1>
+            <p>
+                {{data.content}}
+            </p>
         </div>
         <br />
         <button class="btn btn-primary" @click="getQuote()">Get content</button>
@@ -13,6 +13,7 @@
 </template>
 
 <script>
+const debug = require('debug')('app:HOME')
 export default {
     name: 'Home',
     data () {
@@ -23,16 +24,16 @@ export default {
     },
     methods: {
         getQuote () {
-            console.log('quote')
-            this.$http
-            .get('http://localhost:3000/api/home')
-            .then(data => {
-              console.log('data', data)
-              this.data = data.body
-            })
-            .catch(error => {
-                console.log('error', error)
-            })
+            debug('getting')
+            // this.$http
+            // .get('http://localhost:3000/api/home')
+            // .then(data => {
+            //     debug('data', data)
+            //     this.data = data.body
+            // })
+            // .catch(error => {
+            //     debug('error', error)
+            // })
         }
     }
 }

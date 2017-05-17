@@ -1,6 +1,6 @@
 <template>
     <div class="secretquote">
-        <h1>Secret Quote</h1>
+        <h1>Private Area</h1>
     </div>
 </template>
 
