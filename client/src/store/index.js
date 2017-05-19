@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import auth from './authModule'
+import users from './usersDataModule'
 
 export default new Vuex.Store({
     state: {
@@ -16,6 +17,7 @@ export default new Vuex.Store({
 
     },
     modules: {
-        auth
+        auth,
+        users
     }
 })

@@ -18,7 +18,7 @@
     "cors": "^2.8.3",
     "crypto": "0.0.3",
     "express": "^4.15.2",
-    "express-deliver": "^1.0.0-rc-1",
+    "express-deliver": "^1.0.0-rc-3",
     "fs-extra": "^3.0.1",
     "jsonwebtoken": "^7.4.0",
     "mongoose": "^4.9.7",

@@ -10,7 +10,10 @@ const config = require('../config/main')
 require('./exceptions')
 
 module.exports = app => {
-    expressDeliver(app)
+    expressDeliver(app,{
+        printErrorStack: true, //Default: false 
+        printInternalErrorData: true //Default: false * 
+    })
 
     mongoose.connect(config.database)
     mongoose.Promise = global.Promise

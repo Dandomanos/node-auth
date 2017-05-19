@@ -4,7 +4,7 @@ const debug = require('debug')('API')
 
 const BASE_URL = 'http://localhost:3000'
 
-const API_URL = BASE_URL+'/api'
+const API_URL = BASE_URL
 
 //Error resonse wrapper
 export class ApiError extends Error{
@@ -29,18 +29,18 @@ export class ApiError extends Error{
 const request = axios.create({
     baseURL:API_URL,
     timeout:10000,
-    // headers:{
-    //     x_client_version:process.env.VERSION
-    // }
+    headers:{
+       
+    }
 })
 
 //Intercept request start
 //Used for logging and authorization injection
 request.interceptors.request.use(config => {
     if(config.token) {
-        config.headers.authorization = `Bearer ${config.token}`
+        config.headers.authorization = `${config.token}`
     }
-    debug('request-start', config.url, config)
+    debug('request-start', config.url, config, config.token)
     return config
 })
 
@@ -93,10 +93,19 @@ function handleResponse(err, response) {
 
     //OK Response
     debug('response-ok', response.data)
-    return response.data
+    return response.data.data
 }
 
 export function authenticate(email, password) {
-    return request.post('/auth/login', {email, password})
-        .then(res => res.data )
+    return request.post('/login', {email, password})
+}
+
+export function getUsers(token) {
+    debug('request Token', token)
+
+    return request({
+        url:'/api/users',
+        token
+    })
+        
 }

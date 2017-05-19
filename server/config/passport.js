@@ -6,22 +6,23 @@ const passport = require('passport'),
     LocalStrategy = require('passport-local')
 
 const localOptions = { usernameField: 'email'}
+const expressDeliver = require('express-deliver')
 // const debug = require('debug')('passport')
 
 // Setting up local login strategy
 const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
-
+    console.log('email', email)
     User.findOne( {email: email} , (err, user) => {
         if(err) { return done(err) }
         if(!user) {
             console.log('user not found')
-            return done(null, false, { error: 'Your login details could not be verified. Please try again.'})
+            return done(new expressDeliver.exception.USER_NOT_FOUND())
         }
 
         user.comparePassword(password, function (err, isMatch) {
             
-            if(err) { return done({err}) }
-            if(!isMatch) { return done(null, false, { error: 'Your login details could not be verified. Please try again.'})}
+            if(err) { return done(err) }
+            if(!isMatch) { return done(new expressDeliver.exception.INVALID_PASSWORD())}
 
             return done(null, user)
         })
@@ -37,7 +38,7 @@ const jwtOptions = {
 
 // Setting up JWT login strategy
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
-    User.findById(payload._id, (err, user) => {
+    User.findById(payload, (err, user) => {
         if (err) { return done(err, false) }
 
         if(user) {

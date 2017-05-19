@@ -60,7 +60,7 @@ export default {
             if(this.isLogged) {
                 debug('is logged')
                 if(current == 'Login')
-                    this.$router.replace({name:''})
+                    this.$router.replace({name:'SecretQuote'})
             } else {
                 debug('not logged')
                 if(current != 'Login') {

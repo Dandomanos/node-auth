@@ -29,7 +29,7 @@
                 >
                     <div class="message-body">
                         <p>
-                            <b>{{fetchError.msg}}</b>
+                            <b>{{fetchError.message}}</b>
                         </p>
                     </div>
                 </div>

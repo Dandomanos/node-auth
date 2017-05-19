@@ -5,10 +5,9 @@ const config = require('../config/main')
 const fs = require('fs-extra')
 const path = require('path')
 
+
 function generateToken(user) {
-    return jwt.sign(user,config.secret, {
-        expiresIn: 10080 // in seconds 
-    })
+    return jwt.sign(user,config.secret)
 }
 
 //Set user info from request
@@ -25,17 +24,14 @@ function setUserInfo(request) {
 //========================================
 // Login Route
 //========================================
-exports.login = (req, res, next) => {
+exports.login = function*(req) {
 
     let userInfo = setUserInfo(req.user)
 
-    res.status(200).json({
-        status:true,
-        data:{
-            token: 'JWT ' + generateToken(userInfo),
-            user: userInfo
-        }
-    })
+    return {
+        token: 'JWT ' + generateToken(userInfo._id.toString()),
+        user: userInfo
+    }
 }
 
 //========================================
@@ -44,6 +40,28 @@ exports.login = (req, res, next) => {
 exports.auth = (req, res, next) => {
     res.send('It worked! User id is: ' + req.user._id + '.');
 }
+
+//========================================
+// Users Route
+//========================================
+exports.users = function*(req) {
+    let userInfo = setUserInfo(req.user)
+
+    let users = yield User.find( {} )
+    if(!users) {
+        console.log('users not found')
+        throw new Error ('user not found')
+    }
+    let usersInfo = users.map( user => setUserInfo(user))
+    return {
+        user: userInfo,
+        users: usersInfo
+    }
+
+}
+// exports.users = function(req,res) {
+//     res.send(':(')
+// }
 
 //========================================
 // Admin Users Route
@@ -108,7 +126,7 @@ exports.register = (req, res, next) => {
             let userInfo = setUserInfo(user)
 
             res.status(201).json({
-                token: 'JWT ' + generateToken(userInfo),
+                token: 'JWT ' + generateToken(userInfo._id),
                 user: userInfo
             })
 
@@ -147,4 +165,8 @@ exports.publicHome = (req, res, next)  => {
         title:'Welcome to home view',
         content: 'This is the starting view'
     })
+}
+
+exports.authenticationFail = (err,req,res,next)=>{
+    throw new res.exception.Unauthorized()
 }
