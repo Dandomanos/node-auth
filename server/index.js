@@ -3,7 +3,7 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     logger = require('morgan'),
     mongoose = require('mongoose')
-    config = require('./config/main'),
+    config = require('./app/config/main'),
 
 require('./app/bootstrap')(app)
 

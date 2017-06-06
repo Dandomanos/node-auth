@@ -5,7 +5,9 @@ import SecretQuote from '@/components/SecretQuote.vue'
 import Signup from '@/components/Signup.vue'
 import Login from '@/components/Login.vue'
 import Logout from '@/components/Logout.vue'
+import Register from '@/components/Register.vue'
 import store from '../store/index'
+import Game from '@/components/views/Game.vue'
 // import VueResource from 'vue-resource'
 
 Vue.use(Router)
@@ -29,9 +31,21 @@ const router = new Router({
             meta:{requiredAuth:true}
         },
         {
+            path: '/game',
+            name: 'Game',
+            component: Game,
+            meta:{requiredAuth:true}
+        },
+        {
             path: '/login',
             name: 'Login',
             component: Login,
+            meta:{requiredAuth:false}
+        },
+        {
+            path: '/register',
+            name: 'Register',
+            component: Register,
             meta:{requiredAuth:false}
         },
         {

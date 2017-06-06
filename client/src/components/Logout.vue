@@ -8,7 +8,6 @@
 import {mapActions} from 'vuex'
 // const debug = require('debug')('app:HOME')
 export default {
-    name: 'User',
     data () {
         return {
             

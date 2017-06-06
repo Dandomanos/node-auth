@@ -5,7 +5,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const expressDeliver = require('express-deliver')
 const mongoose = require('mongoose')
-const config = require('../config/main')
+const config = require('./config/main')
 
 require('./exceptions')
 

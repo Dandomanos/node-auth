@@ -100,6 +100,10 @@ export function authenticate(email, password) {
     return request.post('/login', {email, password})
 }
 
+export function register(email,password,firstName,lastName) {
+    return request.post('/register', {email,password,firstName,lastName})
+}
+
 export function getUsers(token) {
     debug('request Token', token)
 

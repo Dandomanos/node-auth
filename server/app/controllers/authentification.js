@@ -4,6 +4,7 @@ const User = require('../models/user')
 const config = require('../config/main')
 const fs = require('fs-extra')
 const path = require('path')
+const expressDeliver = require('express-deliver')
 
 
 function generateToken(user) {
@@ -26,6 +27,7 @@ function setUserInfo(request) {
 //========================================
 exports.login = function*(req) {
 
+    console.log('req body', req.body)
     let userInfo = setUserInfo(req.user)
 
     return {
@@ -85,53 +87,51 @@ exports.adminUsers = (req, res, next) => {
 //========================================
 // Registration Route
 //========================================
-exports.register = (req, res, next) => {
+exports.register = function*(req, res, next) {
     // Check for registration errors
+    console.log('starting register', req.body)
     const email = req.body.email
     const firstName = req.body.firstName
     const lastName = req.body.lastName
     const password = req.body.password
     const role = req.body.role
+    console.log('firstName', firstName)
     if(!email) {
-        return res.status(422).send({error: 'You must enter an email address.'})
+        throw new res.exception.EmailNeeded()
     }
 
     if(!firstName || !lastName) {
-        return res.status(422).send({error: 'You must enter your full name.'})
+         throw new res.exception.FullNameNeeded()
     }
 
     if(!password) {
-        return res.status(422).send({error: 'You must enter a password.'})
+        throw new res.exception.PasswordNeeded()
     }
 
-    User.findOne({ email: email }, (err, existingUser) => {
-        if(err) { return next(err) }
+    let existingUser = yield User.findOne({ email: email })
 
-        if(existingUser) {
-            return res.status(422).send({error: 'That email address is already in use.'})
-        }
 
-        let user = new User({
-            email: email,
-            password: password,
-            profile: { firstName: firstName, lastName: lastName },
-            role: role
-        })
+    if(existingUser) {
+        throw new res.exception.EmailUsed()
+    }
 
-        user.save((err, user) => {
-            if(err) { return next(err) }
-
-            // send email for double optin
-
-            let userInfo = setUserInfo(user)
-
-            res.status(201).json({
-                token: 'JWT ' + generateToken(userInfo._id),
-                user: userInfo
-            })
-
-        })
+    let user = new User({
+        email: email,
+        password: password,
+        profile: { firstName: firstName, lastName: lastName },
+        role: role
     })
+
+    console.log('creating user', user)
+
+    let userSaved = yield user.save()
+    let userInfo = setUserInfo(user)
+    console.log('user saved')
+    return {
+        token: 'JWT ' + generateToken(userInfo._id.toString()),
+        user: userInfo
+    }
+
 }
 
 //========================================
@@ -168,5 +168,6 @@ exports.publicHome = (req, res, next)  => {
 }
 
 exports.authenticationFail = (err,req,res,next)=>{
+    console.log('authentificationFail')
     throw new res.exception.Unauthorized()
 }

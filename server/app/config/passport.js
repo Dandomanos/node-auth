@@ -16,13 +16,13 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
         if(err) { return done(err) }
         if(!user) {
             console.log('user not found')
-            return done(new expressDeliver.exception.USER_NOT_FOUND())
+            return done(new expressDeliver.exception.UserNotFound())
         }
 
         user.comparePassword(password, function (err, isMatch) {
             
             if(err) { return done(err) }
-            if(!isMatch) { return done(new expressDeliver.exception.INVALID_PASSWORD())}
+            if(!isMatch) { return done(new expressDeliver.exception.InvalidPassword())}
 
             return done(null, user)
         })

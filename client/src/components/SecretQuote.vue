@@ -12,7 +12,7 @@
 
 <script>
 import {mapState,mapActions} from 'vuex'
-const debug = require('debug')('PRIVATE')
+// const debug = require('debug')('PRIVATE')
 export default {
     name: 'SecretQuote',
     data () {

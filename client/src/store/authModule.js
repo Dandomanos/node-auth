@@ -53,7 +53,20 @@ export default {
                 commit('SET_FETCH_ERROR', err)
             }
         },
+        async REGISTER({commit},{email,password,firstName,lastName}) {
+            commit('FETCH_STARTED')
+            try {
+                let data = await api.register(email,password,firstName,lastName)
+                window.localStorage.setItem('token', data.token)
+                debug('user',data.user)
+                commit('SET_USER', data.user)
+                commit('SET_TOKEN',data.token)
+            } catch(err){
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
         LOGOUT({commit}) {
+            debug('clear token')
             window.localStorage.removeItem('token')
             commit('CLEAR_TOKEN')
         }

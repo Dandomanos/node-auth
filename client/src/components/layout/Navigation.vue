@@ -5,14 +5,14 @@
                 Home
             </router-link>
         </li>
-        <li>
-            <router-link :to="'/signup'">
-                Sign Up
-            </router-link>
-        </li>
-        <li>
+        <li v-if="isLogged">
             <router-link :to="'/secretquote'">
                 Private Area
+            </router-link>
+        </li>
+        <li v-if="isLogged">
+            <router-link :to="'/game'">
+                Game
             </router-link>
         </li>
         <li v-if="!isLogged">
@@ -23,6 +23,11 @@
         <li v-else>
             <router-link :to="'/logout'">
                 Logout
+            </router-link>
+        </li>
+        <li>
+            <router-link :to="'/register'">
+                Sign Up
             </router-link>
         </li>
     </ul>
@@ -42,9 +47,9 @@ export default {
             logout:'auth/LOGOUT'
         })
     },
-    mounted(){
-        this.logout()
-    },
+    // mounted(){
+    //     // this.logout()
+    // },
     computed:{
         ...mapGetters('auth', ['isLogged'])
     }

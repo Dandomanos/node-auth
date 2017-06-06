@@ -1,7 +1,7 @@
-const AuthenticationController = require('../controllers/authentification'),
+const AuthenticationController = require('./controllers/authentification'),
     express = require('express'),
     expressDeliver = require('express-deliver'),
-    passportService = require('../config/passport'),
+    passportService = require('./config/passport'),
     passport = require('passport')
 
 // Middleware to require login/auth
