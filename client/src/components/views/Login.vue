@@ -1,24 +1,29 @@
 <template>
     <div class="login">
-        <h1>Login</h1>
-        <p>Log in to your account to get some great quotes.</p>
         <div class="error" v-if="error">
             {{error.message}}
         </div>
+        <h1>Login</h1>
         <form @submit.prevent="submit">
             <div class="form-group">
+                <label for="email">Email:</label>
                 <input
                     ref="email"
+                    name="email"
+                    id="email"
                     type="text"
-                    class="form-control"
+                    class="primary-input"
                     placeholder="Enter your username"
                     v-model="email"
                 >
             </div>
             <div class="form-group">
+                <label for="password">Password:</label>
                 <input
                     type="password"
-                    class="form-control"
+                    name="password"
+                    id="password"
+                    class="primary-input"
                     placeholder="Enter your password"
                     v-model="password"
                 >
@@ -34,7 +39,8 @@
                     </div>
                 </div>
             <button
-                :disabled="!fullFilled || loading"        
+                :disabled="!fullFilled || loading"    
+                class="primary-button"    
                 type="submit"
             >Enter</button>
         </form>

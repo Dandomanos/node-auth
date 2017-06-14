@@ -6,7 +6,8 @@ export default {
     state: {
         fetchStatus:null,
         fetchError:null,
-        users:null
+        users:null,
+        user:null
     },
     mutations: {
         FETCH_STARTED(state) {
@@ -16,7 +17,8 @@ export default {
         },
         SET_USERS(state, users) {
             state.fetchStatus = 'success'
-            state.users = users
+            state.users = users.users
+            state.user = users.user
         },
         CLEAR_USERS(state) {
             debug('clear')
@@ -32,9 +34,10 @@ export default {
         async GET_USERS({commit,rootState}) {
             commit('FETCH_STARTED')
             try {
+                debug('token from rootState', rootState.auth.token)
                 let data = await api.getUsers(rootState.auth.token)
                 debug('users',data.users)
-                commit('SET_USERS', data.users)
+                commit('SET_USERS', data)
             } catch(err){
                 commit('SET_FETCH_ERROR', err)
             }

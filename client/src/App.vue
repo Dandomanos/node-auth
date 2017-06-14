@@ -1,54 +1,31 @@
 <template>
-    <div id="app">
-        <nav>
+    <div id="app" class="hero is-fullheight">
+        <layout-header class="hero-head"></layout-header>
+        <div class="hero-body">
             <div class="container">
-                <navigation></navigation>
-                <user></user>
-                logged:{{isLogged}}
+                <router-view></router-view>
             </div>
-        </nav>
-
-        <router-view></router-view>
+        </div>
+        <layout-footer class="hero-foot"></layout-footer>
     </div>
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 const debug = require('debug')('APP.VUE')
-import User from './components/User'
-import Navigation from './components/layout/Navigation'
+import LayoutHeader from './components/layout/LayoutHeader'
+import LayoutFooter from './components/layout/LayoutFooter'
 
 export default {
     data () {
         return {
-            menu : [
-                {
-                    title: 'Home',
-                    path: '/home'
-                },
-                {
-                    title: 'Login',
-                    path: '/login'
-                },
-                {
-                    title: 'Sign Up',
-                    path: '/signup'
-                },
-                {
-                    title: 'Secret Quote',
-                    path: 'secretquote'
-                },
-                {
-                    title: 'Logout',
-                    path: '/logout'
-                }
-            ]
+            
         }
     },
     name: 'app',
     components:{
-        User,
-        Navigation
+        LayoutHeader,
+        LayoutFooter
     },
     computed:{
         ...mapGetters('auth', ['isLogged'])
@@ -58,9 +35,9 @@ export default {
             debug('checking if is logged')
             let current = this.$route.name
             if(this.isLogged) {
-                debug('is logged')
+                debug('is logged', this.isLogged)
                 if(current == 'Login')
-                    this.$router.replace({name:'SecretQuote'})
+                    this.$router.replace({name:'Profile'})
             } else {
                 debug('not logged')
                 if(current != 'Login') {
@@ -70,13 +47,19 @@ export default {
             }
         }
     },
-    created() {
-        this.$store.dispatch('auth/RECOVER_TOKEN')
+    async created() {
+        await this.isLogged ? this.getUser() : true
+    },
+    methods: {
+        ...mapActions({
+            getUser:'auth/GET_USER'
+        })
     }
 }
 </script>
 
-<style>
+<style lang="scss">
+@import '~bulma/bulma.sass';
 #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -86,5 +69,55 @@ export default {
 }
 *{
     box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+h1 {
+    color: #2e815b;
+    font-weight:bold;
+    font-size:2rem;
+}
+.primary-button {
+    display:block;
+    width:100%;
+    max-width:20rem;
+    padding:0.5rem 1rem;
+    background-color:#d6f1e5;
+    margin:0.5rem auto;
+    color:#2e815b;
+    font-weight:bold;
+    text-decoration:none;
+    -webkit-appearance: none;
+    appearance:none;
+    border:none;
+    box-shadow:none;
+    font-size:1rem;
+    &:focus {
+        outline:none;
+    }
+}
+.form-group {
+    margin-bottom:1rem;
+}
+.primary-input {
+    width:100%;
+    max-width:20rem;
+    padding:0.5rem 1rem;
+    &:focus {
+        outline:none;
+    }
+}
+form {
+    width:100%;
+    max-width:20rem;
+    margin:0 auto;
+}
+.form-group {
+    label {
+        display:block;
+        text-align:left;
+        font-size:1rem;
+        font-weight:bold;
+    }
 }
 </style>

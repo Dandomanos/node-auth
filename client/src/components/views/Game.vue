@@ -9,7 +9,7 @@
 
 <script>
 // import anime from 'animejs'
-import Card from './Card'
+import Card from '../commons/Card'
 export default {
     name: 'Game',
     components: {

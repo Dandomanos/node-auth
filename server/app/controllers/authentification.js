@@ -22,6 +22,13 @@ function setUserInfo(request) {
     }
 }
 
+function getQuery(path) {
+    let url = require('url')
+    let url_parts = url.parse(path, true)
+    let query = url_parts.query
+    return query
+}
+
 //========================================
 // Login Route
 //========================================
@@ -49,11 +56,16 @@ exports.auth = (req, res, next) => {
 exports.users = function*(req) {
     let userInfo = setUserInfo(req.user)
 
+    let query = getQuery(req.url)
+    if(query.onlySelf)
+        return { user: userInfo }
+
     let users = yield User.find( {} )
     if(!users) {
         console.log('users not found')
         throw new Error ('user not found')
     }
+    // console.log('users', users)
     let usersInfo = users.map( user => setUserInfo(user))
     return {
         user: userInfo,
@@ -61,9 +73,6 @@ exports.users = function*(req) {
     }
 
 }
-// exports.users = function(req,res) {
-//     res.send(':(')
-// }
 
 //========================================
 // Admin Users Route
@@ -114,7 +123,7 @@ exports.register = function*(req, res, next) {
     if(existingUser) {
         throw new res.exception.EmailUsed()
     }
-
+    console.log('firstName before created', firstName)
     let user = new User({
         email: email,
         password: password,
