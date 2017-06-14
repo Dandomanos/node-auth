@@ -1,6 +1,8 @@
 <template>
     <div class="gameContainer">
-        <button @click="createDesk()">New Desk</button>
+        <div class="toolbar">
+            <button @click="createDesk()" class="primary-button is-toolbar">New Desk</button>
+        </div>
         <div class="game">  
             <card v-for="card in desk" :type="card.type" :number="card.number" :key="card.number+card.type"></card>
         </div>
@@ -40,6 +42,10 @@ export default {
 </script>
 
 <style lang="scss">
+.gameContainer {
+    margin: 1rem auto;
+    padding: 1rem;
+}
 .game {
     width:100%;
     max-width:50rem;

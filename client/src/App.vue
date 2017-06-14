@@ -92,6 +92,15 @@ h1 {
     border:none;
     box-shadow:none;
     font-size:1rem;
+    &.is-toolbar {
+        width:auto;
+        display:inline-block;
+        font-size:0.8rem;
+    }
+    &:hover {
+        background-color:#2e815b;
+        color:#d6f1e5;
+    }
     &:focus {
         outline:none;
     }
@@ -103,6 +112,10 @@ h1 {
     width:100%;
     max-width:20rem;
     padding:0.5rem 1rem;
+    background-color:lighten(#d6f1e5,8);
+    box-shadow:none;
+    outline:none;
+    border:1px solid #ddd;
     &:focus {
         outline:none;
     }
@@ -125,5 +138,9 @@ form {
     .container {
         position:initial;
     }
+}
+.toolbar {
+    position:absolute;
+    top:1rem;
 }
 </style>

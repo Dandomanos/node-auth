@@ -1,10 +1,10 @@
 <template>
     <div class="control-panel" v-if="isAdmin">
         <div class="toolbar">
-            <button class="is-main" @click="createGame" >
+            <button class="primary-button is-toolbar" @click="createGame" >
                 Create Game
             </button>
-            <button class="is-main" @click="getUsers">
+            <button class="primary-button is-toolbar" @click="getUsers">
                 Get Users
             </button>
         </div>
@@ -54,10 +54,6 @@ export default {
 .control-panel{
     margin:1rem auto;
     padding:1rem;
-    .toolbar {
-        position:absolute;
-        top:1rem;
-    }
     .users {
         border:1px solid #ccc;
         padding:1rem;
