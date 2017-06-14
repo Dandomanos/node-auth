@@ -5,9 +5,14 @@
                 Home
             </router-link>
         </li>
+        <li v-if="isAdmin">
+            <router-link :to="'/admin'">
+                Admin
+            </router-link>
+        </li>
         <li v-if="isLogged">
-            <router-link :to="'/secretquote'">
-                Private Area
+            <router-link :to="'/profile'">
+                Profile
             </router-link>
         </li>
         <li v-if="isLogged">
@@ -25,7 +30,7 @@
                 Logout
             </router-link>
         </li>
-        <li>
+        <li v-if="!isLogged">
             <router-link :to="'/register'">
                 Sign Up
             </router-link>
@@ -36,7 +41,7 @@
 import {mapActions, mapGetters} from 'vuex'
 
 export default {
-    name: 'User',
+    name: 'Navigation',
     data () {
         return {
             
@@ -47,11 +52,11 @@ export default {
             logout:'auth/LOGOUT'
         })
     },
-    // mounted(){
-    //     // this.logout()
-    // },
     computed:{
-        ...mapGetters('auth', ['isLogged'])
+        ...mapGetters('auth', ['isLogged', 'user']),
+        isAdmin() {
+            return this.isLogged && this.user && this.user.role === 'Admin'
+        }
     }
 }
 </script>

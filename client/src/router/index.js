@@ -1,17 +1,15 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '@/components/Home'
-import SecretQuote from '@/components/SecretQuote.vue'
-import Signup from '@/components/Signup.vue'
-import Login from '@/components/Login.vue'
-import Logout from '@/components/Logout.vue'
-import Register from '@/components/Register.vue'
+import Home from '@/components/views/Home.vue'
+import Profile from '@/components/views/Profile.vue'
+import Login from '@/components/views/Login.vue'
+import Logout from '@/components/views/Logout.vue'
+import Register from '@/components/views/Register.vue'
 import store from '../store/index'
 import Game from '@/components/views/Game.vue'
-// import VueResource from 'vue-resource'
+import Admin from '@/components/views/Admin.vue'
 
 Vue.use(Router)
-// Vue.use(VueResource)
 
 const debug = require('debug')('ROUTER')
 
@@ -25,9 +23,9 @@ const router = new Router({
             meta:{requiredAuth:false}
         },
         {
-            path: '/secretquote',
-            name: 'SecretQuote',
-            component: SecretQuote,
+            path: '/profile',
+            name: 'Profile',
+            component: Profile,
             meta:{requiredAuth:true}
         },
         {
@@ -55,10 +53,10 @@ const router = new Router({
             meta:{requiredAuth:false}
         },
         {
-            path: '/signup',
-            name: 'Signup',
-            component: Signup,
-            meta:{requiredAuth:false}
+            path: '/admin',
+            name: 'Admin',
+            component: Admin,
+            meta:{requiredAuth:true}
         },
         {
             path: '*',
@@ -75,11 +73,14 @@ router.beforeEach((to,from,next)=>{
     let authRequired = to.matched.some(route=> route.meta.requiredAuth)
     debug('authRequired', authRequired)
     //Initial logged state
-    // if(store.state.auth.isLogged===null) {
-    //     next(false)
-    //     router.replace(to.fullPath)
-    //     return
-    // }
+    debug('token',store.state.auth['token'])
+    if(store.state.auth.token===null) {
+        debug('initial state',store.state)
+        store.dispatch('auth/RECOVER_TOKEN')
+        // next(false)
+        // router.replace(to.fullPath)
+        // return
+    }
 
     //Redirect to non auth route 
     if(to.matched.some(route=> route.meta.requiredAuth===true)) {

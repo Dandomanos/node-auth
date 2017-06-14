@@ -1,49 +1,64 @@
 <template>
     <div class="register">
         <h1>Register</h1>
-        <p>Create a new account.</p>
+        <h2>Create a new account.</h2>
         <div class="error" v-if="error">
             {{error.message}}
         </div>
         <form @submit.prevent="submit">
             <div class="form-group">
+                <label for="email">Email:</label>
                 <input
                     ref="email"
+                    id="email"
+                    name="email"
                     type="text"
-                    class="form-control"
-                    placeholder="Enter your email"
+                    class="primary-input"
+                    placeholder="Enter your Email"
                     v-model="email"
                 >
             </div>
             <div class="form-group">
+                <label for="firstName">Firstname:</label>
                 <input
                     type="text"
-                    class="form-control"
-                    placeholder="Enter your firstname"
+                    id="firstName"
+                    name="firstName"
+                    class="primary-input"
+                    placeholder="Enter your Firstname"
                     v-model="firstName"
                 >
             </div>
             <div class="form-group">
+                <label for="lastName">Lastname:</label>
                 <input
                     type="text"
-                    class="form-control"
-                    placeholder="Enter your lastname"
+                    id="lastName"
+                    name="lastName"
+                    class="primary-input"
+                    placeholder="Enter your Lastname"
                     v-model="lastName"
                 >
             </div>
             <div class="form-group">
+                <label for="password">Lastname:</label>
                 <input
                     type="password"
-                    class="form-control"
-                    placeholder="Enter your password"
+                    id="password"
+                    name="password"
+                    class="primary-input"
+                    placeholder="Enter your Password"
                     v-model="password"
                 >
             </div>
             <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
                 <input
                     type="password"
-                    class="form-control"
-                    placeholder="Confirm your password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    class="primary-input"
+                    placeholder="Confirm your Password"
                     v-model="confirmPassword"
                 >
             </div>
@@ -60,6 +75,7 @@
             <button
                 :disabled="!fullFilled || loading"        
                 type="submit"
+                class="primary-button"
             >Enter</button>
         </form>
     </div>

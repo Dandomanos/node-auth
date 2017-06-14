@@ -104,6 +104,14 @@ export function register(email,password,firstName,lastName) {
     return request.post('/register', {email,password,firstName,lastName})
 }
 
+export function getUser(token) {
+    debug('request Token', token)
+    return request({
+        url:'/api/users/?onlySelf=true',
+        token
+    })
+}
+
 export function getUsers(token) {
     debug('request Token', token)
 
