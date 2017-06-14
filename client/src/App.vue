@@ -120,4 +120,10 @@ form {
         font-weight:bold;
     }
 }
+.hero.is-fullheight .hero-body {
+    position:relative;
+    .container {
+        position:initial;
+    }
+}
 </style>

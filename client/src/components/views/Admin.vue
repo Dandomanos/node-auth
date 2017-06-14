@@ -8,7 +8,7 @@
                 Get Users
             </button>
         </div>
-        <div class="users">
+        <div class="users" v-if="users">
             <ul>
                 <li v-for="user in users">
                     <b>{{user.firstName}} {{user.lastName}}</b> {{user.email}} <small>[{{user.role}}]</small>
@@ -54,8 +54,13 @@ export default {
 .control-panel{
     margin:1rem auto;
     padding:1rem;
-    border:1px solid #ccc;
+    .toolbar {
+        position:absolute;
+        top:1rem;
+    }
     .users {
+        border:1px solid #ccc;
+        padding:1rem;
         li {
             display:block;
         }

@@ -1,5 +1,5 @@
 <template>
-    <div class="login">
+    <div class="login" v-if="!user">
         <div class="error" v-if="error">
             {{error.message}}
         </div>
@@ -45,6 +45,11 @@
             >Enter</button>
         </form>
     </div>
+    <div v-else>
+        <router-link class="primary-button" :to="'/logout'">
+                Logout
+        </router-link>
+    </div>
 </template>
 
 <script>
@@ -64,7 +69,8 @@ export default {
     computed: {
         ...mapState({
             fetchStatus: state => state.auth.fetchStatus,
-            fetchError: state => state.auth.fetchError
+            fetchError: state => state.auth.fetchError,
+            user: state => state.auth.user
         }),
         fullFilled(){
             return !!this.email.length && !!this.password.length
