@@ -2,80 +2,33 @@
     <div class="register">
         <h1>Register</h1>
         <h2>Create a new account.</h2>
-        <div class="error" v-if="error">
-            {{error.message}}
-        </div>
+
         <form @submit.prevent="submit">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input
-                    ref="email"
-                    id="email"
-                    name="email"
-                    type="text"
-                    class="primary-input"
-                    placeholder="Enter your Email"
-                    v-model="email"
-                >
-            </div>
-            <div class="form-group">
-                <label for="firstName">Firstname:</label>
-                <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    class="primary-input"
-                    placeholder="Enter your Firstname"
-                    v-model="firstName"
-                >
-            </div>
-            <div class="form-group">
-                <label for="lastName">Lastname:</label>
-                <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    class="primary-input"
-                    placeholder="Enter your Lastname"
-                    v-model="lastName"
-                >
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    class="primary-input"
-                    placeholder="Enter your Password"
-                    v-model="password"
-                >
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password:</label>
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    class="primary-input"
-                    placeholder="Confirm your Password"
-                    v-model="confirmPassword"
-                >
-            </div>
+            <form-group-validate
+                :field="field"
+                :errorFields="errorFields"
+                v-for="field in formFields"
+                :key="field.name"
+            >              
+            </form-group-validate>
+
             <div 
-                    class="message is-warning"
-                    v-if="fetchError" 
+                    class="message is-warning" v-if="fetchError || error"
                 >
                     <div class="message-body">
-                        <p>
+                        <p v-if="fetchError">
                             <b>{{fetchError.message}}</b>
+                        </p>
+                        <p v-if="error">
+                            <b>{{error.message}}</b>
                         </p>
                     </div>
                 </div>
-            <button
-                :disabled="!fullFilled || loading"        
+            <button     
                 type="submit"
-                class="primary-button"
+                class="button primary-button"
+                :class="{'is-loading': loading}"
+                :disabled="fullFilled != 1"
             >Enter</button>
         </form>
     </div>
@@ -83,34 +36,97 @@
 
 <script>
 import {mapState,mapActions} from 'vuex'
-// const debug = require('debug')('app:HOME')
+import FormGroupValidate from '../commons/FormGroupValidate'
+const debug = require('debug')('app:REGISTER => ')
 export default {
     data () {
         return {
-            email:'',
-            password:'',
-            confirmPassword:'',
-            lastName:'',
-            firstName:'',
-            error:null
+            error:null,
+            formFields:[
+                {
+                    name: 'email',
+                    label: 'Email',
+                    placeHolder: 'Enter your email',
+                    model: '',
+                    type: 'email'
+                },
+                {
+                    name: 'firstName',
+                    label: 'Firstname',
+                    placeHolder: 'Enter your Firstname',
+                    model: '',
+                    type: 'text'
+                },
+                {
+                    name: 'lastName',
+                    label: 'Lastname',
+                    placeHolder: 'Enter your Lastname',
+                    model: '',
+                    type: 'text'
+                },
+                {
+                    name: 'password',
+                    label: 'Password',
+                    placeHolder: 'Enter your Password',
+                    model: '',
+                    type: 'password'
+                },
+                {
+                    name: 'confirmPassword',
+                    label: 'Confirm Password',
+                    placeHolder: 'Confirm your Password',
+                    model: '',
+                    type: 'password'
+                }
+            ]
         }
+    },
+    components: {
+        FormGroupValidate
     },
     methods: {
         ...mapActions({
-            register:'auth/REGISTER'
+            register:'auth/REGISTER',
+            clearFetchError:'auth/CLEAR_ERROR'
         }),
         submit(){
-            let data = {
-                email:this.email,
-                password:this.password,
-                firstName:this.firstName,
-                lastName:this.lastName
+
+            // Client Validation
+            if(!this.fullFilled) {
+                return this.setError({ message: 'You must fill all fields', fields:['all']})
             }
+            let data = {}
+            this.formFields.map( item => data[item.name] = item.model )
+            debug('data', data)
+
+            if(!this.validateEmail(data.email))
+                return this.setError({ message: 'Insert a valid email', fields:['email']})
+
+            if(!this.validatePassword(data.password))
+                return this.setError({ message: 'Your Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter and one number', fields:['password']})
+
+            if(data.password!==data.confirmPassword)
+                return this.setError({ message: 'Your passwords do not match', fields:['password', 'confirmPassword']})
+
+            this.error = null
+            
             this.register(data)
+        },
+        setError(error){
+            this.clearFetchError()
+            this.error = error
+        },
+        validateEmail(email) {
+            let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            return re.test(email)
+        },
+        validatePassword(password) {
+            let re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/
+            return re.test(password)
         }
     },
     mounted(){
-        this.$refs.email.focus()
+        // this.$refs.email.focus()
     },
     computed: {
         ...mapState({
@@ -118,11 +134,20 @@ export default {
             fetchError: state => state.auth.fetchError
         }),
         fullFilled(){
-            return !!this.email.length && !!this.password.length && !!this.confirmPassword.length && !!this.lastName.length && !!this.firstName.length
+            return this.formFields.map( item => !!item.model.length ).filter( item => item == false ).length<=0
         },
         loading(){
             return this.fetchStatus == 'fetching'
-        }
+        },
+        errorFields(){
+            if(this.error && this.error.fields)
+                return this.error.fields.map( item => item )
+
+            if(this.fetchError && this.fetchError.fields)
+                return this.fetchError.fields.map( item => item )
+
+            return []
+        }   
     }
 }
 </script>

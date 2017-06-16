@@ -11,7 +11,7 @@ export default {
     },
     mutations: {
         FETCH_STARTED(state) {
-            state.fechStatus = 'fetching'
+            state.fetchStatus = 'fetching'
             state.token = false
             state.fetchError = null
         },
@@ -31,6 +31,11 @@ export default {
             state.user = null
             state.token = false
             state.fetchStatus = null
+        },
+        CLEAR_ERROR(state) {
+            debug('Clear Error')
+            state.fetchStatus = null
+            state.fetchError = null
         },
         SET_FETCH_ERROR(state, error) {
             state.fetchStatus = 'failed'
@@ -86,6 +91,9 @@ export default {
             debug('clear token')
             window.localStorage.removeItem('token')
             commit('CLEAR_TOKEN')
+        },
+        CLEAR_ERROR({commit}) {
+            commit('CLEAR_ERROR')
         }
     },
     getters:{

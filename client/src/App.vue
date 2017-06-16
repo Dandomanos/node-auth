@@ -92,6 +92,10 @@ h1 {
     border:none;
     box-shadow:none;
     font-size:1rem;
+    &:disabled {
+        opacity:0.5;
+        cursor: not-allowed;
+    }
     &.is-toolbar {
         width:auto;
         display:inline-block;
@@ -120,19 +124,13 @@ h1 {
         outline:none;
     }
 }
+
 form {
     width:100%;
     max-width:20rem;
     margin:0 auto;
 }
-.form-group {
-    label {
-        display:block;
-        text-align:left;
-        font-size:1rem;
-        font-weight:bold;
-    }
-}
+
 .hero.is-fullheight .hero-body {
     position:relative;
     .container {

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import {getErrorObject} from '../utils/errors'
 
 const debug = require('debug')('API')
 
@@ -9,6 +10,7 @@ const API_URL = BASE_URL
 //Error resonse wrapper
 export class ApiError extends Error{
     constructor(data) {
+        debug('ApiError', data)
         if(!data || typeof data!=='object')
             data = {}
         if(!data.msg)
@@ -17,12 +19,14 @@ export class ApiError extends Error{
         data.code |=0
         if(!data.code)
             data.code = -1
-
+        debug('ApiError before super')
         super(data.msg)
         this.name = this.constructor.name
         this.code = data.code|0
         this.data = data
+
     }
+
 }
 
 //Axios instance
@@ -88,6 +92,15 @@ function handleResponse(err, response) {
     if(!response.data || response.data.status !== true) {
         let errorData = response.data && response.data.error
         debug('response-error', errorData)
+
+        // Customize error
+        // let errObject = getErrorObject(errorData.code)
+        // if(errObject.fields)
+        //     errorData.fields = errObject.fields.map( item => item )
+        Object.assign(errorData, getErrorObject(errorData.code))
+        debug('response-error handle', errorData)
+
+
         return Promise.reject(new ApiError(errorData))
     }
 
