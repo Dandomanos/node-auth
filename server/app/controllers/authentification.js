@@ -147,26 +147,26 @@ exports.register = function*(req, res, next) {
 // Authorization Middleware
 //========================================
 
-//Role authorization check
-// exports.roleAuthorization = role => {
-//     return (req, res, next) => {
-//         const user = req.user
-//         User.findById(user._id, (err, foundUser) => {
-//             if(err) {
-//                 console.log('error', err)
-//                 res.status(422).json({ error: 'No user was found'})
-//             }
+// Role authorization check
+exports.roleAuthorization = role => {
+    return (req, res, next) => {
+        const user = req.user
+        User.findById(user._id, (err, foundUser) => {
+            if(err) {
+                console.log('error', err)
+                res.status(422).json({ error: 'No user was found'})
+            }
 
-//             if(foundUser.role == role) {
-//                 console.log('foundUser.role', role)
-//                 return next()
-//             }
+            if(foundUser.role == role) {
+                console.log('foundUser.role', role)
+                return next()
+            }
 
-//             res.status(401).json({error:'User unauthorized', role: user.role})
-//             return next('Unauthorized')
-//         })
-//     }
-// }
+            res.status(401).json({error:'User unauthorized', role: user.role})
+            return next('Unauthorized')
+        })
+    }
+}
 
 //Public Home
 exports.publicHome = (req, res, next)  => {

@@ -47,7 +47,8 @@ exception.define({
 exception.define({
     name:'EmailUsed',
     code:2006,
-    message:'You email is already in use.',
+    message:'Your email is already in use.',
+    fields: ['email'],
     statusCode:422
 })
 
