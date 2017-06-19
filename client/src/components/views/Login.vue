@@ -1,33 +1,14 @@
 <template>
     <div class="login" v-if="!user">
-        <div class="error" v-if="error">
-            {{error.message}}
-        </div>
         <h1>Login</h1>
         <form @submit.prevent="submit">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input
-                    ref="email"
-                    name="email"
-                    id="email"
-                    type="text"
-                    class="primary-input"
-                    placeholder="Enter your username"
-                    v-model="email"
-                >
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    class="primary-input"
-                    placeholder="Enter your password"
-                    v-model="password"
-                >
-            </div>
+            <form-group-validate
+                :field="field"
+                :errorFields="errorFields"
+                v-for="field in formFields"
+                :key="field.name"
+            >              
+            </form-group-validate>
             <div 
                     class="message is-warning"
                     v-if="fetchError" 
@@ -54,17 +35,37 @@
 
 <script>
 import {mapState,mapActions} from 'vuex'
+import FormGroupValidate from '../commons/FormGroupValidate'
 export default {
     name: 'Login',
     data () {
         return {
             email:'',
             password:'',
-            error:null
+            error:null,
+            formFields:[
+                {
+                    name: 'email',
+                    label: 'Email',
+                    placeHolder: 'Enter your email',
+                    model: '',
+                    type: 'email'
+                },
+                {
+                    name: 'password',
+                    label: 'Password',
+                    placeHolder: 'Enter your Password',
+                    model: '',
+                    type: 'password'
+                }
+            ]
         }
     },
+    components: {
+        FormGroupValidate
+    },
     mounted(){
-        this.$refs.email.focus()
+        // this.$refs.email.focus()
     },
     computed: {
         ...mapState({
@@ -73,10 +74,17 @@ export default {
             user: state => state.auth.user
         }),
         fullFilled(){
-            return !!this.email.length && !!this.password.length
+            return this.formFields.map( item => !!item.model.length ).filter( item => item == false ).length<=0
         },
         loading(){
             return this.fetchStatus == 'fetching'
+        },
+        errorFields(){
+
+            if(this.fetchError && this.fetchError.fields)
+                return this.fetchError.fields.map( item => item )
+
+            return []
         }
     },
     methods: {
@@ -84,36 +92,24 @@ export default {
             login:'auth/LOGIN'
         }),
         submit(){
-            this.login({email:this.email,password:this.password})
+            let data = {}
+            this.formFields.map( item => data[item.name] = item.model )
+            this.login({email:data.email,password:data.password})
         }
     }
 }
 </script>
 
-<style>
-.error {
-    color:red;
-}
-
-.form-control {
-    width:100%;
-    max-width:200px;
-    padding:10px;
-    margin:0 auto;
-    margin-bottom:5px;
-}
-
-button {
-    width:auto;
-    padding:10px;
-    text-transform:uppercase;
-    cursor:pointer;
-}
+<style lang="scss">
 .message {
     font-size:12px;
     font-family:courier;
+    &.is-warning {
+        .message-body {
+            color:darken(red,10);
+            border-color:red;
+        }
+    }
 }
-.is-warning {
-    color:orangered;
-}
+
 </style>

@@ -3,6 +3,10 @@ const errorsObject = {
         'fields': ['email'],
         'message': 'EMAIL ALREADY IN USE'
     },
+    '2001': {
+        'fields': ['email', 'password'],
+        'message': 'WRONG EMAIL OR PASSWORD'
+    },
     'generic': {
         'message': 'GENERIC ERROR'
     }
