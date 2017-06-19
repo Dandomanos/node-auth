@@ -42,6 +42,11 @@ export default {
     data () {
         return {
             error:null,
+            regEx: {
+                email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
+                name: /^[-'a-zA-ZÀ-ÖØ-öø-ſ ]+$/
+            },
             formFields:[
                 {
                     name: 'email',
@@ -99,10 +104,16 @@ export default {
             this.formFields.map( item => data[item.name] = item.model )
             debug('data', data)
 
-            if(!this.validateEmail(data.email))
+            if(!this.validateField(this.regEx.email, data.email))
                 return this.setError({ message: 'Insert a valid email', fields:['email']})
 
-            if(!this.validatePassword(data.password))
+            if(!this.validateField(this.regEx.name, data.firstName))
+                return this.setError({ message: "Your Firstname can't contains numbers and special letters", fields:['firstName']})
+
+            if(!this.validateField(this.regEx.name, data.lastName))
+                return this.setError({ message: "Your Lastname can't contains numbres and special letters", fields:['lastName']})
+
+            if(!this.validateField(this.regEx.password, data.password))
                 return this.setError({ message: 'Your Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter and one number', fields:['password']})
 
             if(data.password!==data.confirmPassword)
@@ -116,13 +127,8 @@ export default {
             this.clearFetchError()
             this.error = error
         },
-        validateEmail(email) {
-            let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            return re.test(email)
-        },
-        validatePassword(password) {
-            let re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/
-            return re.test(password)
+        validateField(re, field) {
+            return re.test(field)
         }
     },
     mounted(){

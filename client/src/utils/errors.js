@@ -18,17 +18,3 @@ export function getErrorObject(code,fallback='generic'){
         errorsObject[fallback && fallback.toString()]
     )
 }
-
-// export default class Errors {
-
-//     getErrorObject(code,fallback='generic'){
-//         debug('Code', code)
-//         debug('Object', errorsObject[code])
-//         return true
-//         // return (
-//         //     errorsObject[code && code.toString()] || 
-//         //     errorsObject[fallback && fallback.toString()]
-//         // )
-//     }
-    
-// }

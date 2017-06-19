@@ -92,11 +92,6 @@ function handleResponse(err, response) {
     if(!response.data || response.data.status !== true) {
         let errorData = response.data && response.data.error
         debug('response-error', errorData)
-
-        // Customize error
-        // let errObject = getErrorObject(errorData.code)
-        // if(errObject.fields)
-        //     errorData.fields = errObject.fields.map( item => item )
         Object.assign(errorData, getErrorObject(errorData.code))
         debug('response-error handle', errorData)
 
