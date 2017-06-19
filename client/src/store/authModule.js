@@ -12,8 +12,13 @@ export default {
     mutations: {
         FETCH_STARTED(state) {
             state.fetchStatus = 'fetching'
-            state.token = false
+            state.token =false
             state.fetchError = null
+        },
+        FETCH_LOGGED_STARTED(state){
+            state.fetchStatus = 'fetching'
+            state.fetchError = null
+            state.user = null
         },
         SET_TOKEN(state, token) {
             // state.fetchStatus = 'success'
@@ -52,7 +57,7 @@ export default {
             }
         },
         async GET_USER({commit,state}) {
-            // commit('FETCH_STARTED')
+            commit('FETCH_LOGGED_STARTED')
             try {
                 debug('token from state', state.token)
                 let data = await api.getUser(state.token)
@@ -70,6 +75,19 @@ export default {
                 debug('user',data.user)
                 commit('SET_USER', data.user)
                 commit('SET_TOKEN',data.token)
+            } catch(err){
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async UPDATE({commit,state},{firstName,lastName}) {
+            commit('FETCH_LOGGED_STARTED')
+            debug('firstName',firstName, 'lastName',lastName)
+            try {
+                let data = await api.updateProfile(firstName,lastName,state.token)
+                // window.localStorage.setItem('token', data.token)
+                debug('data',data.user)
+                commit('SET_USER', data.user)
+                // commit('SET_TOKEN',data.token)
             } catch(err){
                 commit('SET_FETCH_ERROR', err)
             }

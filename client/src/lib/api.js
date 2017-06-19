@@ -104,12 +104,32 @@ function handleResponse(err, response) {
     return response.data.data
 }
 
+/* UNLOGGED END POINTS */
+
 export function authenticate(email, password) {
     return request.post('/login', {email, password})
 }
 
+
 export function register(email,password,firstName,lastName) {
     return request.post('/register', {email,password,firstName,lastName})
+}
+
+
+/* AUTH END POINTS */
+
+export function updateProfile(firstName, lastName, token) {
+    debug('FN',firstName, 'LN', lastName)
+    return request({
+        url:'api/updateProfile',
+        method: 'POST',
+        token,
+        data: {
+            firstName,
+            lastName
+        }
+    })
+    // return request.post('api/updateProfile', {firstName, lastName})
 }
 
 export function getUser(token) {

@@ -92,6 +92,30 @@ exports.adminUsers = (req, res, next) => {
     })
 }
 
+//========================================
+// Update Profile Route
+//========================================
+exports.updateProfile = function*(req, res, next) {
+    console.log('updating profile', req.body,req.user._id)
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+
+    if(!firstName || !lastName) {
+         throw new res.exception.FullNameNeeded()
+    }
+
+    let updatedUser = yield User.findOneAndUpdate({ _id: req.user._id },{profile:{firstName:firstName,lastName:lastName}})
+
+    console.log('user updated', updatedUser)
+    let user = setUserInfo(updatedUser)
+    user.firstName = firstName
+    user.lastName = lastName
+    return {
+        msg: 'user updated',
+        user: user
+    }
+
+}
 
 //========================================
 // Registration Route

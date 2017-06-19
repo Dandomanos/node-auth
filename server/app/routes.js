@@ -48,6 +48,9 @@ module.exports = app => {
     // Test Data Home
     apiRoutes.get('/home', AuthenticationController.publicHome)
 
+    //Update Profile
+    apiRoutes.post('/updateProfile', AuthenticationController.updateProfile)
+
     // Protect dashboard route with JWT and Admin Role user
     // apiRoutes.get('/admin', requireAuth, AuthenticationController.roleAuthorization('Admin'), AuthenticationController.adminUsers)
 
