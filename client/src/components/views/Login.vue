@@ -10,10 +10,10 @@
             >              
             </form-group-validate>
             <div 
-                    class="message is-warning"
+                    class="celm-form-tip is-warning"
                     v-if="fetchError" 
                 >
-                    <div class="message-body">
+                    <div class="celm-form-tip-body">
                         <p>
                             <b>{{fetchError.message}}</b>
                         </p>
@@ -21,13 +21,13 @@
                 </div>
             <button
                 :disabled="!fullFilled || loading"    
-                class="primary-button"    
+                class="celm-button"    
                 type="submit"
             >Enter</button>
         </form>
     </div>
     <div v-else>
-        <router-link class="primary-button" :to="'/logout'">
+        <router-link class="celm-button" :to="'/logout'">
                 Logout
         </router-link>
     </div>
@@ -99,17 +99,3 @@ export default {
     }
 }
 </script>
-
-<style lang="scss">
-.message {
-    font-size:12px;
-    font-family:courier;
-    &.is-warning {
-        .message-body {
-            color:darken(red,10);
-            border-color:red;
-        }
-    }
-}
-
-</style>

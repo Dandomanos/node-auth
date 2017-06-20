@@ -1,10 +1,10 @@
 <template>
-    <div class="form-group" :class="{'error' : hasError }">
+    <div class="celm-form-group" :class="{'error' : hasError }">
         <label :for="field.name">{{field.label}}:</label>
         <input
             v-if="field.type=='password'"
             type="password"
-            class="primary-input"
+            class="celm-input"
             :id="field.name"
             :name="field.name"
             :placeholder="field.placeHolder"
@@ -13,7 +13,7 @@
         <input
             v-else-if="field.type=='email'"
             type="email"
-            class="primary-input"
+            class="celm-input"
             :id="field.name"
             :name="field.name"
             :placeholder="field.placeHolder"
@@ -22,7 +22,7 @@
         <input
             v-else
             type="text"
-            class="primary-input"
+            class="celm-input"
             :id="field.name"
             :name="field.name"
             :placeholder="field.placeHolder"
@@ -43,19 +43,3 @@ export default {
     }
 }
 </script>
-<style lang="scss">
-.form-group {
-    &.error {
-        .primary-input {
-            border-color:red;
-        }
-    }
-    label {
-        display:block;
-        text-align:left;
-        font-size:1rem;
-        font-weight:bold;
-    }
-}
-
-</style>

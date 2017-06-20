@@ -1,0 +1,37 @@
+@import './_const.scss';
+@import './commons.scss';
+
+/* MAIN STYLES */
+#app {
+    font-family:$font-family;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: $fonts-color;
+}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+h1,h2,h3,h4 {
+    @extend .celm-title;
+}
+h1 {
+    font-size:$header-fs;
+}
+h2 {
+    font-size:$subheader-fs;
+}
+
+form {
+    @extend .celm-form;
+}
+
+.hero.is-fullheight .hero-body {
+    position:relative;
+    .container {
+        position:initial;
+    }
+}

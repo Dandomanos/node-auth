@@ -13,11 +13,11 @@
             </form-group-validate>
 
             <div 
-                    class="message is-warning" v-if="fetchError || error"
+                    class="celm-form-tip is-warning" v-if="fetchError || error"
                 >
-                    <div class="message-body">
+                    <div class="celm-form-tip-body">
                         <p v-if="fetchError">
-                            <b>{{fetchError.message}}</b>
+                            <b>{{fetchError.celm-form-tip}}</b>
                         </p>
                         <p v-if="error">
                             <b>{{error.message}}</b>
@@ -26,7 +26,7 @@
                 </div>
             <button     
                 type="submit"
-                class="button primary-button"
+                class="button celm-button"
                 :class="{'is-loading': loading}"
                 :disabled="fullFilled != 1"
             >Enter</button>

@@ -10,11 +10,11 @@ export default {
 }
 </script>
 <style lang="scss">
-$primary: #42b983;
+@import '../../assets/scss/_const.scss';
 footer {
-    padding:1rem;
-    background-color:lighten($primary,40);
-    color:darken($primary,15);
+    padding:$footer-padding;
+    background-color:$footer-bg-color;
+    color:$footer-font-color;
     small {
         font-weight:bold;
     }

@@ -1,10 +1,10 @@
 <template>
-    <div class="control-panel" v-if="isAdmin">
-        <div class="toolbar">
-            <button class="primary-button is-toolbar" @click="createGame" >
+    <div class="celm-control-panel" v-if="isAdmin">
+        <div class="celm-toolbar">
+            <button class="celm-button is-toolbar" @click="createGame" >
                 Create Game
             </button>
-            <button class="primary-button is-toolbar" @click="getUsers">
+            <button class="celm-button is-toolbar" @click="getUsers">
                 Get Users
             </button>
         </div>
@@ -51,12 +51,13 @@ export default {
 }
 </script>
 <style lang="scss">
-.control-panel{
-    margin:1rem auto;
-    padding:1rem;
+@import '../../assets/scss/_const.scss';
+.celm-control-panel{
+    margin:$control-panel-margin auto;
+    padding:$control-panel-padding;
     .users {
-        border:1px solid #ccc;
-        padding:1rem;
+        border:$control-panel-user-border;
+        padding:$control-panel-padding;
         li {
             display:block;
         }

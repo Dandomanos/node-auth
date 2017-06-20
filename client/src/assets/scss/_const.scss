@@ -1,0 +1,63 @@
+/* COLORS */
+$primary-color: #42b983;
+$background-color: #FFF;
+$fonts-color: #2c3e50;
+$error-color:red;
+
+/* FONTS */
+$font-family: 'Avenir', Helvetica, Arial, sans-serif;
+$base-fs:1rem;
+$header-fs:$base-fs*2;
+$subheader-fs:$base-fs*1.5;
+$label-fs:$base-fs;
+$input-fs:$base-fs*0.8;
+
+/* DISPLAYS */
+//margins
+$base-margin:$base-fs;
+$border-size:1px;
+$border-style:solid;
+//forms
+$form-max-width:20rem;
+//buttons
+$button-max-width:$form-max-width;
+$button-padding:$base-margin*0.5 $base-margin;
+$button-margin:$base-margin*0.5 auto;
+$button-bg-color: lighten($primary-color,40);
+$button-font-color: darken($primary-color,15);
+//inputs
+$input-max-width:$button-max-width;
+$input-padding:$button-padding;
+$input-bg-color: lighten($button-bg-color,8);
+$input-border-color:darken($background-color, 13);
+$input-border: $border-size $border-style $input-border-color;
+//Header
+$header-padding:$base-margin;
+$header-margin:$base-margin;
+$header-bg-color:$button-bg-color;
+$header-font-color:$button-font-color;
+$header-list-margin:0 $base-margin*0.625;
+//Footer
+$footer-padding:$base-margin;
+$footer-bg-color:$button-bg-color;
+$footer-font-color:$button-font-color;
+//Tips
+$tip-fs:$base-fs*0.75;
+//Profile
+$profile-border:$input-border;
+$profile-padding:$base-margin;
+//Admin control panel
+$control-panel-margin:$base-margin auto;
+$control-panel-padding:$base-margin;
+$control-panel-user-border:$input-border;
+//GAME
+$game-margin:$base-margin;
+$game-max-width:50rem;
+$game-max-height:$game-max-width;
+$game-border:$input-border;
+//Cards
+$card-width:10%;
+$card-height:5.75rem;
+$card-radius:3px;
+$card-air:2px;
+$card-border:$input-border;

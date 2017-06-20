@@ -1,7 +1,7 @@
 <template>
     <div class="Profile-container">
         <h1>Profile</h1>
-        <div class="data-user" v-if="user">
+        <div class="celm-data-user" v-if="user">
             <ul>
                 <li><b>ID</b>: {{user._id}}<br></li>
                 <li><b>First Name</b>: {{user.firstName}}<br></li>
@@ -10,8 +10,8 @@
                 <li><b>Role</b>: [{{user.role}}]<br></li>
             </ul>
         </div>
-        <div class="profile-edit">
-            <button class="primary-button" @click="toggleForm()"  v-if="!formVisible">
+        <div class="celm-profile-edit">
+            <button class="celm-button" @click="toggleForm()"  v-if="!formVisible">
                 Edit Profile
             </button>
             <div 
@@ -26,10 +26,10 @@
                     >              
                     </form-group-validate>
 
-                    <button class="primary-button" type="submit" :disabled="!profileFilled || loading"  >
+                    <button class="celm-button" type="submit" :disabled="!profileFilled || loading"  >
                         Update Profile
                     </button>
-                    <button class="primary-button" type="button" @click="toggleForm()">
+                    <button class="celm-button" type="button" @click="toggleForm()">
                         Cancel
                     </button>
                 </form>
@@ -117,18 +117,19 @@ export default {
 </script>
 
 <style lang="scss">
-.data-user {
+@import '../../assets/scss/_const.scss';
+.celm-data-user {
     display: flex;
     align-items: center;
     ul {
-        border:1px solid #ccc;
+        border:$profile-border;
         margin: 0 auto;
         text-align: left;
-        padding:1rem;
+        padding:$profile-padding;
     }
 }
-.profile-edit {
-    margin:1rem auto;
-    padding:1rem;
+.celm-profile-edit {
+    margin:$profile-padding auto;
+    padding:$profile-padding;
 }
 </style>
