@@ -11,7 +11,13 @@
         <div class="users" v-if="users">
             <ul>
                 <li v-for="user in users">
-                    <b>{{user.firstName}} {{user.lastName}}</b> {{user.email}} <small>[{{user.role}}]</small>
+                    <h4>{{user.username}}</h4> 
+                    {{user.firstName}} {{user.lastName}} 
+                    <small>[{{user.email}}] <b>{{user.role}}</b> 
+                        <b v-if="user.emailActive" class="is-success">CONFIRMED EMAIL</b>
+                        <b v-else="user.emailActive" class="is-warning">UNVERIFIED EMAIL</b>
+                    </small> 
+                    {{user.games.length}}
                 </li>
             </ul>
         </div>
@@ -60,6 +66,10 @@ export default {
         padding:$control-panel-padding;
         li {
             display:block;
+            h4 {
+                font-weight:bold;
+                margin:0;
+            }
         }
     }
 }

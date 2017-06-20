@@ -36,7 +36,7 @@ export default {
             let current = this.$route.name
             if(this.isLogged) {
                 debug('is logged', this.isLogged)
-                if(current == 'Login')
+                if(current == 'Login' || 'Register')
                     this.$router.replace({name:'Profile'})
             } else {
                 debug('not logged')
@@ -61,13 +61,4 @@ export default {
 <style lang="scss">
 @import '~bulma/bulma.sass';
 @import './assets/scss/main.scss';
-
-
-
-
-
-
-
-
-
 </style>

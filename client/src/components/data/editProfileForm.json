@@ -1,5 +1,12 @@
 [
     {
+        "name": "username",
+        "label": "Username",
+        "placeHolder": "Enter your Username",
+        "model": "",
+        "type": "text"
+    },
+    {
         "name": "firstName",
         "label": "Firstname",
         "placeHolder": "Enter your Firstname",

@@ -1,6 +1,8 @@
 <template>
     <div class="home">
-        <h1>{{title}}</h1>
+        <div class="home-title">
+            <h1>{{title}}</h1>
+        </div>
         <img src="../../assets/logo.png">
         <div class="user" v-if="user">
             {{user.email}}

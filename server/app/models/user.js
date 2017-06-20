@@ -12,13 +12,32 @@ const UserSchema = new Schema({
         unique:true,
         required:true
     },
+    emailActive: {
+        type:Boolean,
+        default:false
+    },
+    games: {
+        type:Array,
+        default:false
+    },
+    username: {
+        type:String,
+        required:true,
+        unique:true
+    },
     password: {
         type: String,
         required:true
     },
     profile: {
-        firstName: { type: String },
-        lastName: { type: String }
+        firstName: {
+            type: String,
+            default: ''
+        },
+        lastName: {
+            type: String,
+            default: ''
+        }
     },
     role: {
         type: String,

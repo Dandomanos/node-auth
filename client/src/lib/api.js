@@ -111,20 +111,21 @@ export function authenticate(email, password) {
 }
 
 
-export function register(email,password,firstName,lastName) {
-    return request.post('/register', {email,password,firstName,lastName})
+export function register(username,email,password,firstName,lastName) {
+    return request.post('/register', {username,email,password,firstName,lastName})
 }
 
 
 /* AUTH END POINTS */
 
-export function updateProfile(firstName, lastName, token) {
+export function updateProfile(username,firstName, lastName, token) {
     debug('FN',firstName, 'LN', lastName)
     return request({
         url:'api/updateProfile',
         method: 'POST',
         token,
         data: {
+            username,
             firstName,
             lastName
         }

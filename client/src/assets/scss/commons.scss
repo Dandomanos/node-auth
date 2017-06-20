@@ -5,6 +5,7 @@
     font-weight:normal;
     color:$primary-color;
     margin:$header-margin;
+    display:inline-block;
 }
 
 //Forms
@@ -86,7 +87,7 @@
     }
     &.is-success {
         .celm-form-tip-body {
-            color:green;
+            color:$success-color;
         }
     }
 }
@@ -95,4 +96,12 @@
 .celm-toolbar {
     position:absolute;
     top:$base-margin;
+}
+
+//states
+.is-warning {
+    color:$error-color;
+}
+.is-success {
+    color:$success-color;
 }

@@ -23,6 +23,8 @@ exception.define({
     statusCode:422
 })
 
+
+
 // exception.define({
 //     name:'EMAIL_NEEDED',
 //     code:2003,
@@ -38,6 +40,13 @@ exception.define({
 })
 
 exception.define({
+    name:'UsernameNeeded',
+    code:2004,
+    message:'You must enter an Username.',
+    statusCode:422
+})
+
+exception.define({
     name:'PasswordNeeded',
     code:2005,
     message:'You must enter a password.',
@@ -49,6 +58,14 @@ exception.define({
     code:2006,
     message:'Your email is already in use.',
     fields: ['email'],
+    statusCode:422
+})
+
+exception.define({
+    name:'UsernameUsed',
+    code:2007,
+    message:'Your Username is already in use.',
+    fields: ['username'],
     statusCode:422
 })
 

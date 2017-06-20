@@ -79,11 +79,11 @@ export default {
                 commit('SET_FETCH_ERROR', err)
             }
         },
-        async UPDATE({commit,state},{firstName,lastName}) {
+        async UPDATE({commit,state},{username,firstName,lastName}) {
             commit('FETCH_LOGGED_STARTED')
             debug('firstName',firstName, 'lastName',lastName)
             try {
-                let data = await api.updateProfile(firstName,lastName,state.token)
+                let data = await api.updateProfile(username,firstName,lastName,state.token)
                 // window.localStorage.setItem('token', data.token)
                 debug('data',data.user)
                 commit('SET_USER', data.user)
@@ -92,11 +92,11 @@ export default {
                 commit('SET_FETCH_ERROR', err)
             }
         },
-        async REGISTER({commit},{email,password,firstName,lastName}) {
+        async REGISTER({commit},{username,email,password,firstName,lastName}) {
             commit('FETCH_STARTED')
             try {
                 debug('email',email, 'password', password, 'firstName', firstName, 'lastName',lastName)
-                let data = await api.register(email,password,firstName,lastName)
+                let data = await api.register(username,email,password,firstName,lastName)
                 window.localStorage.setItem('token', data.token)
                 debug('user',data.user)
                 commit('SET_USER', data.user)

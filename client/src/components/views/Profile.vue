@@ -4,6 +4,7 @@
         <div class="celm-data-user" v-if="user">
             <ul>
                 <li><b>ID</b>: {{user._id}}<br></li>
+                <li><b>Username</b>: {{user.username}}<br></li>
                 <li><b>First Name</b>: {{user.firstName}}<br></li>
                 <li><b>Last Name</b>: {{user.lastName}}<br></li>
                 <li><b>Email</b>: {{user.email}}<br></li>
@@ -98,7 +99,7 @@ export default {
             this.profileUpdated = true
         },
         autofill() {
-            if(this.user)
+            if(this.user && this.formFields)
                 this.formFields = this.formFields.map( item => Object.assign({}, item, {model:this.user[item.name]}))
         },
         ...mapActions({

@@ -15,6 +15,9 @@ function generateToken(user) {
 function setUserInfo(request) {
     return {
         _id: request._id,
+        games:request.games,
+        emailActive:request.emailActive,
+        username: request.username || '',
         firstName: request.profile.firstName,
         lastName: request.profile.lastName,
         email: request.email,
@@ -99,17 +102,22 @@ exports.updateProfile = function*(req, res, next) {
     console.log('updating profile', req.body,req.user._id)
     const firstName = req.body.firstName
     const lastName = req.body.lastName
+    const username = req.body.username
+
+    if(!username)
+        throw new res.exception.UsernameNeeded()
 
     if(!firstName || !lastName) {
          throw new res.exception.FullNameNeeded()
     }
 
-    let updatedUser = yield User.findOneAndUpdate({ _id: req.user._id },{profile:{firstName:firstName,lastName:lastName}})
+    let updatedUser = yield User.findOneAndUpdate({ _id: req.user._id },{username:username,profile:{firstName:firstName,lastName:lastName}})
 
     console.log('user updated', updatedUser)
     let user = setUserInfo(updatedUser)
     user.firstName = firstName
     user.lastName = lastName
+    user.username = username
     return {
         msg: 'user updated',
         user: user
@@ -123,12 +131,17 @@ exports.updateProfile = function*(req, res, next) {
 exports.register = function*(req, res, next) {
     // Check for registration errors
     console.log('starting register', req.body)
+    const username = req.body.username
     const email = req.body.email
     const firstName = req.body.firstName
     const lastName = req.body.lastName
     const password = req.body.password
     const role = req.body.role
     console.log('firstName', firstName)
+
+    if(!username)
+        throw new res.exception.UsernameNeeded()
+    
     if(!email) {
         throw new res.exception.EmailNeeded()
     }
@@ -141,6 +154,10 @@ exports.register = function*(req, res, next) {
         throw new res.exception.PasswordNeeded()
     }
 
+    let freeUsername = yield User.findOne({ username: username })
+    if(freeUsername)
+        throw new res.exception.UsernameUsed()
+
     let existingUser = yield User.findOne({ email: email })
 
 
@@ -149,6 +166,9 @@ exports.register = function*(req, res, next) {
     }
     console.log('firstName before created', firstName)
     let user = new User({
+        emailActive:false,
+        games: [],
+        username: username,
         email: email,
         password: password,
         profile: { firstName: firstName, lastName: lastName },
