@@ -107,11 +107,12 @@ export default {
                 this.formFields = this.formFields.map( item => Object.assign({}, item, {model:this.user[item.name]}))
         },
         ...mapActions({
-            updateProfile:'auth/UPDATE'
+            updateProfile:'auth/UPDATE',
+            clearFetchError:'auth/CLEAR_ERROR'
         })
     },
     mounted() {
-        
+        this.clearFetchError()
     }
 }
 </script>
