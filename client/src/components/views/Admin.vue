@@ -69,6 +69,7 @@ export default {
             h4 {
                 font-weight:bold;
                 margin:0;
+                display:inline-block;
             }
         }
     }
