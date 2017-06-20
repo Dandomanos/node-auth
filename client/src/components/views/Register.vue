@@ -132,6 +132,8 @@ export default {
         }
     },
     mounted(){
+        this.clearFetchError()
+        this.error = null
         // this.$refs.email.focus()
     },
     computed: {

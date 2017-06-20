@@ -65,6 +65,8 @@ export default {
         FormGroupValidate
     },
     mounted(){
+        this.clearFetchError()
+        this.error = null
         // this.$refs.email.focus()
     },
     computed: {
@@ -89,7 +91,8 @@ export default {
     },
     methods: {
         ...mapActions({
-            login:'auth/LOGIN'
+            login:'auth/LOGIN',
+            clearFetchError:'auth/CLEAR_ERROR'
         }),
         submit(){
             let data = {}
