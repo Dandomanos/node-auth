@@ -2,13 +2,13 @@
     <div class="login" v-if="!user">
         <h1>Login</h1>
         <form @submit.prevent="submit">
-            <form-group-validate
+            <form-group-validator
                 :field="field"
                 :errorFields="errorFields"
                 v-for="field in formFields"
                 :key="field.name"
             >              
-            </form-group-validate>
+            </form-group-validator>
             <div 
                     class="celm-form-tip is-warning"
                     v-if="fetchError" 
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             <button
-                :disabled="!fullFilled || loading"    
+                :disabled="!isFullFilled || loading"    
                 class="celm-button"    
                 type="submit"
             >Enter</button>
@@ -35,69 +35,39 @@
 
 <script>
 import {mapState,mapActions} from 'vuex'
-import FormGroupValidate from '../commons/FormGroupValidate'
+import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
+import FormGroupValidator from '../commons/FormGroupValidator'
+const formFields = require('../data/loginForm.json')
+const debug = require('debug')('LOGIN =>')
 export default {
     name: 'Login',
+    mixins:[FormValidatorMixin],
     data () {
         return {
-            email:'',
-            password:'',
-            error:null,
-            formFields:[
-                {
-                    name: 'email',
-                    label: 'Email',
-                    placeHolder: 'Enter your email',
-                    model: '',
-                    type: 'email'
-                },
-                {
-                    name: 'password',
-                    label: 'Password',
-                    placeHolder: 'Enter your Password',
-                    model: '',
-                    type: 'password'
-                }
-            ]
+            formFields
         }
     },
     components: {
-        FormGroupValidate
+        FormGroupValidator
     },
     mounted(){
-        this.clearFetchError()
-        this.error = null
-        // this.$refs.email.focus()
+        debug('formFields', formFields)
     },
     computed: {
         ...mapState({
-            fetchStatus: state => state.auth.fetchStatus,
-            fetchError: state => state.auth.fetchError,
             user: state => state.auth.user
         }),
-        fullFilled(){
-            return this.formFields.map( item => !!item.model.length ).filter( item => item == false ).length<=0
-        },
-        loading(){
-            return this.fetchStatus == 'fetching'
-        },
-        errorFields(){
-
-            if(this.fetchError && this.fetchError.fields)
-                return this.fetchError.fields.map( item => item )
-
-            return []
+        isFullFilled() {
+            return this.fullFilled(this.formFields)
         }
     },
     methods: {
         ...mapActions({
-            login:'auth/LOGIN',
-            clearFetchError:'auth/CLEAR_ERROR'
+            login:'auth/LOGIN'
         }),
         submit(){
-            let data = {}
-            this.formFields.map( item => data[item.name] = item.model )
-            this.login({email:data.email,password:data.password})
+            let data = this.getFormData(formFields)
+            this.login(data)
         }
     }
 }

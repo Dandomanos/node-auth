@@ -84,6 +84,11 @@
             border-color:$error-color;
         }
     }
+    &.is-success {
+        .celm-form-tip-body {
+            color:green;
+        }
+    }
 }
 
 //Toolbars

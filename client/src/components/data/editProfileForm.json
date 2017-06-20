@@ -1,0 +1,16 @@
+[
+    {
+        "name": "firstName",
+        "label": "Firstname",
+        "placeHolder": "Enter your Firstname",
+        "model": "",
+        "type": "text"
+    },
+    {
+        "name": "lastName",
+        "label": "Lastname",
+        "placeHolder": "Enter your Lastname",
+        "model": "",
+        "type": "text"
+    }
+]

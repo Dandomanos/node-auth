@@ -1,0 +1,37 @@
+[
+    {
+        "name": "email",
+        "label": "Email",
+        "placeHolder": "Enter your email",
+        "model": "",
+        "type": "email"
+    },
+    {
+        "name": "firstName",
+        "label": "Firstname",
+        "placeHolder": "Enter your Firstname",
+        "model": "",
+        "type": "text"
+    },
+    {
+        "name": "lastName",
+        "label": "Lastname",
+        "placeHolder": "Enter your Lastname",
+        "model": "",
+        "type": "text"
+    },
+    {
+        "name": "password",
+        "label": "Password",
+        "placeHolder": "Enter your Password",
+        "model": "",
+        "type": "password"
+    },
+    {
+        "name": "confirmPassword",
+        "label": "Confirm Password",
+        "placeHolder": "Confirm your Password",
+        "model": "",
+        "type": "password"
+    }
+]

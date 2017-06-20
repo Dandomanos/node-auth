@@ -18,19 +18,36 @@
             v-else-if="formVisible">
                 <h1>Profile Edit Form</h1>
                 <form @submit.prevent="update">
-                    <form-group-validate
+                    <form-group-validator
                         :field="field"
                         :errorFields="errorFields"
                         v-for="field in formFields"
                         :key="field.name"
                     >              
-                    </form-group-validate>
+                    </form-group-validator>
 
+                    <div  class="celm-form-tip is-warning" v-if="fetchError || error" >
+                        <div class="celm-form-tip-body">
+                            <p v-if="fetchError">
+                                <b>{{fetchError.message}}</b>
+                            </p>
+                            <p v-else-if="error">
+                                <b>{{error.message}}</b>
+                            </p>
+                        </div>
+                    </div>
+                    <div  class="celm-form-tip is-success" v-else-if="profileUpdated" >
+                        <div class="celm-form-tip-body">
+                            <p>
+                                Profile Updated succesfully
+                            </p>
+                        </div>
+                    </div>
                     <button class="celm-button" type="submit" :disabled="!profileFilled || loading"  >
                         Update Profile
                     </button>
                     <button class="celm-button" type="button" @click="toggleForm()">
-                        Cancel
+                        Back
                     </button>
                 </form>
             </div>
@@ -40,54 +57,22 @@
 
 <script>
 import {mapState,mapActions} from 'vuex'
-import FormGroupValidate from '../commons/FormGroupValidate'
-const debug = require('debug')('Profile => ')
+import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
+import FormGroupValidator from '../commons/FormGroupValidator'
+// const debug = require('debug')('Profile => ')
+const formFields = require('../data/editProfileForm.json')
 export default {
     name: 'Profile',
+    mixins:[FormValidatorMixin],
     data () {
         return {
             formVisible:false,
-            formFields:[
-                {
-                    name: 'firstName',
-                    label: 'Firstname',
-                    placeHolder: 'Enter your Firstname',
-                    model: '',
-                    type: 'text'
-                },
-                {
-                    name: 'lastName',
-                    label: 'Lastname',
-                    placeHolder: 'Enter your Lastname',
-                    model: '',
-                    type: 'text'
-                },
-                
-            ]
+            formFields,
+            profileUpdated:false
         }
     },
     components: {
-        FormGroupValidate
-    },
-    computed: {
-        ...mapState({
-            fetchStatus: state => state.auth.fetchStatus,
-            fetchError: state => state.auth.fetchError,
-            user: state => state.auth.user
-        }),
-        errorFields(){
-
-            if(this.fetchError && this.fetchError.fields)
-                return this.fetchError.fields.map( item => item )
-
-            return []
-        },
-        profileFilled() {
-            return this.formFields.map( item => !!item.model.length ).filter( item => item == false ).length<=0
-        },
-        loading(){
-            return this.fetchStatus == 'fetching'
-        }
+        FormGroupValidator
     },
     methods: {
         toggleForm() {
@@ -95,25 +80,39 @@ export default {
             this.autofill()
         },
         update() {
-            let data = {}
-            this.formFields.map( item => data[item.name] = item.model )
-            debug('data', data)
-            this.updateProfile({firstName:data.firstName,lastName:data.lastName})
-            this.toggleForm()
-            debug('updating form')
+            //Client Validation
+            if(!this.profileFilled) {
+                return this.setError({ message: 'You must fill all fields', fields:['all']})
+            }
+            let data = this.getFormData(this.formFields)
+
+            if(!this.validateField('name', data.firstName))
+                return this.setError({ message: "Your Firstname can't contains numbers and special letters", fields:['firstName']})
+
+            if(!this.validateField('name', data.lastName))
+                return this.setError({ message: "Your Lastname can't contains numbres and special letters", fields:['lastName']})
+
+            this.profileUpdated = false
+            this.error = null
+            this.updateProfile(data)
+            this.profileUpdated = true
         },
         autofill() {
             if(this.user)
                 this.formFields = this.formFields.map( item => Object.assign({}, item, {model:this.user[item.name]}))
         },
         ...mapActions({
-            updateProfile:'auth/UPDATE',
-            clearFetchError:'auth/CLEAR_ERROR'
+            updateProfile:'auth/UPDATE'
         })
     },
-    mounted() {
-        this.clearFetchError()
-    }
+    computed: {
+        ...mapState({
+            user: state => state.auth.user
+        }),
+        profileFilled() {
+            return this.fullFilled(this.formFields)
+        }
+    },
 }
 </script>
 

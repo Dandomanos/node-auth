@@ -32,13 +32,13 @@
 </template>
 
 <script>
-
+// const debug = require('debug')('FormGroupValidator =>')
 export default {
-    name: 'FormGroupValidate',
+    name: 'FormGroupValidator',
     props: ['field', 'errorFields','inputType'],
     computed:{
         hasError() {
-            return this.errorFields.map(item => item === this.field.name || item === 'all').filter(Boolean)[0]
+            return Object.prototype.toString.call( this.errorFields ) === '[object Array]' ? this.errorFields.map(item => item === this.field.name || item === 'all').filter(Boolean)[0] : false
         }
     }
 }

@@ -1,0 +1,16 @@
+[
+    {
+        "name": "email",
+        "label": "Email",
+        "placeHolder": "Enter your email",
+        "model": "",
+        "type": "email"
+    },
+    {
+        "name": "password",
+        "label": "Password",
+        "placeHolder": "Enter your Password",
+        "model": "",
+        "type": "password"
+    }
+]
