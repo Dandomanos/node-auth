@@ -4,6 +4,7 @@ const passport = require('passport'),
     JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt,
     LocalStrategy = require('passport-local')
+    exception = require('../exceptions')
 
 const localOptions = { usernameField: 'email'}
 const expressDeliver = require('express-deliver')
@@ -11,18 +12,18 @@ const expressDeliver = require('express-deliver')
 
 // Setting up local login strategy
 const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
-    console.log('email', email)
+    console.log('email', email, password)
     User.findOne( {email: email} , (err, user) => {
         if(err) { return done(err) }
         if(!user) {
             console.log('user not found')
-            return done(new expressDeliver.exception.UserNotFound())
+            return done(new exception.InvalidEmailPassword())
         }
 
         user.comparePassword(password, function (err, isMatch) {
             
             if(err) { return done(err) }
-            if(!isMatch) { return done(new expressDeliver.exception.InvalidPassword())}
+            if(!isMatch) { return done(new exception.InvalidEmailPassword())}
 
             return done(null, user)
         })

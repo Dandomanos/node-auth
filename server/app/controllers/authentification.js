@@ -111,6 +111,11 @@ exports.updateProfile = function*(req, res, next) {
          throw new res.exception.FullNameNeeded()
     }
 
+    let freeUsername = yield User.findOne({ username: username })
+    // console.log('freeUsername', freeUsername._id, req.user._id)
+    if(freeUsername && freeUsername._id.toString() !== req.user._id.toString())
+        throw new res.exception.UsernameUsed()
+
     let updatedUser = yield User.findOneAndUpdate({ _id: req.user._id },{username:username,profile:{firstName:firstName,lastName:lastName}})
 
     console.log('user updated', updatedUser)
@@ -121,6 +126,53 @@ exports.updateProfile = function*(req, res, next) {
     return {
         msg: 'user updated',
         user: user
+    }
+
+}
+
+//========================================
+// Update Profile Route
+//========================================
+exports.changePassword = function*(req, res, next) {
+    console.log('updating profile', req.body,req.user._id)
+    const password = req.body.password
+    const newPassword = req.body.newPassword
+    const confirmed = req.body.confirmNewPassword
+
+    if(!password)
+        throw new res.exception.PasswordNeeded()
+
+    if(!newPassword || !confirmed) {
+         throw new res.exception.NewPasswordConfirmNeeded()
+    }
+
+    let user = yield User.findOne( { _id: req.user._id })
+    if(!user)
+        throw new res.exception.UserNotFound()
+    
+
+    let matched = yield new Promise((resolve,reject)=>{
+        user.comparePassword(password, (err, isMatch) => {
+            if(err) { return reject(err) }
+            resolve(isMatch)
+        })
+    })
+
+    if (!matched)
+        throw new res.exception.InvalidPassword()
+
+    console.log('matched', matched)
+    console.log('user', user)
+    user.password = newPassword
+    let userSaved = yield user.save()
+
+    // let passUpdated = yield User.findOneAndUpdate({ _id: req.user._id },{password:password}) 
+    
+    
+    // console.log('user updated', updatedUser)
+    return {
+        msg: 'password updated',
+        newPass: newPassword
     }
 
 }

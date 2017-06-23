@@ -5,6 +5,7 @@ export default {
     data () {
         return {
             error:null,
+            success:null,
             regEx: {
                 email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
                 password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
@@ -19,11 +20,21 @@ export default {
         }),
         loading(){
             return this.fetchStatus == 'fetching'
+        },
+        errorFields(){
+            if(this.error && this.error.fields)
+                return this.error.fields.map( item => item )
+
+            if(this.fetchError && this.fetchError.fields)
+                return this.fetchError.fields.map( item => item )
+
+            return []
         }
     },
     mounted() {
         this.clearFetchError()
-        this.error = null
+        this.error = null,
+        this.success = null
     },
     methods: {
         ...mapActions({
@@ -37,18 +48,19 @@ export default {
             formFields.map( item => data[item.name] = item.model )
             return data
         },
-        errorFields(){
-            if(this.error && this.error.fields)
-                return this.error.fields.map( item => item )
-
-            if(this.fetchError && this.fetchError.fields)
-                return this.fetchError.fields.map( item => item )
-
-            return []
-        },
         setError(error){
             this.clearFetchError()
             this.error = error
+        },
+        setSuccess(success){
+            this.clearFetchError()
+            this.error = null
+            this.success = success
+        },
+        resetForms() {
+            this.clearFetchError()
+            this.success = null
+            this.error = null
         },
         validateField(type, field) {
             return this.regEx[type].test(field)

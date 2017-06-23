@@ -12,16 +12,12 @@
             >              
             </form-group-validator>
 
-            <div  class="celm-form-tip is-warning" v-if="fetchError || error" >
-                <div class="celm-form-tip-body">
-                    <p v-if="fetchError">
-                        <b>{{fetchError.message}}</b>
-                    </p>
-                    <p v-if="error">
-                        <b>{{error.message}}</b>
-                    </p>
-                </div>
-            </div>
+            <form-messages-handler
+                :error="error"
+                :fetchError="fetchError"
+                :success="success"
+            >
+            </form-messages-handler>
             <button     
                 type="submit"
                 class="button celm-button"
@@ -36,6 +32,7 @@
 import {mapActions} from 'vuex'
 import FormGroupValidator from '../commons/FormGroupValidator'
 import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
+import FormMessagesHandler from '../commons/FormMessagesHandler'
 // const debug = require('debug')('app:REGISTER => ')
 const formFields = require('../data/registerForm.json')
 export default {
@@ -47,7 +44,8 @@ export default {
         }
     },
     components: {
-        FormGroupValidator
+        FormGroupValidator,
+        FormMessagesHandler
     },
     methods: {
         ...mapActions({

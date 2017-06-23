@@ -130,8 +130,22 @@ export function updateProfile(username,firstName, lastName, token) {
             lastName
         }
     })
-    // return request.post('api/updateProfile', {firstName, lastName})
 }
+
+export function changePassword(password,newPassword, confirmNewPassword, token) {
+    debug('pass',password, 'new pass', newPassword)
+    return request({
+        url:'api/changePassword',
+        method: 'POST',
+        token,
+        data: {
+            password,
+            newPassword,
+            confirmNewPassword
+        }
+    })
+}
+
 
 export function getUser(token) {
     debug('request Token', token)

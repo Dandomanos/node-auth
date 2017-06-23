@@ -18,7 +18,10 @@ export default {
         FETCH_LOGGED_STARTED(state){
             state.fetchStatus = 'fetching'
             state.fetchError = null
-            state.user = null
+        },
+        FETCH_PASSWORD_STARTED(state){
+            state.fetchStatus = 'fetching'
+            state.fetchError = null
         },
         SET_TOKEN(state, token) {
             // state.fetchStatus = 'success'
@@ -26,6 +29,9 @@ export default {
         },
         SET_USER(state,user) {
             state.user = user
+            state.fetchStatus = 'success'
+        },
+        PASSWORD_UPDATED(state) {
             state.fetchStatus = 'success'
         },
         GET_TOKEN(state) {
@@ -59,7 +65,6 @@ export default {
         async GET_USER({commit,state}) {
             commit('FETCH_LOGGED_STARTED')
             try {
-                debug('token from state', state.token)
                 let data = await api.getUser(state.token)
                 debug('users',data.users)
                 commit('SET_USER', data.user)
@@ -87,6 +92,19 @@ export default {
                 // window.localStorage.setItem('token', data.token)
                 debug('data',data.user)
                 commit('SET_USER', data.user)
+                // commit('SET_TOKEN',data.token)
+            } catch(err){
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async CHANGE_PASSWORD({commit,state},{password,newPassword,confirmNewPassword}) {
+            commit('FETCH_PASSWORD_STARTED')
+            debug('password',password, 'newPassword',newPassword, 'confirmNewPassword',confirmNewPassword)
+            try {
+                let data = await api.changePassword(password,newPassword,confirmNewPassword,state.token)
+                // window.localStorage.setItem('token', data.token)
+                debug('data',data)
+                commit('PASSWORD_UPDATED')
                 // commit('SET_TOKEN',data.token)
             } catch(err){
                 commit('SET_FETCH_ERROR', err)

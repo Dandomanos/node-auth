@@ -20,6 +20,9 @@
         .celm-input {
             border-color:$error-color;
         }
+        label {
+            color:$error-color;
+        }
     }
     label {
         display:block;

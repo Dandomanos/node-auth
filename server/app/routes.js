@@ -51,6 +51,9 @@ module.exports = app => {
     //Update Profile
     apiRoutes.post('/updateProfile', AuthenticationController.updateProfile)
 
+    //Update Profile
+    apiRoutes.post('/changePassword', AuthenticationController.changePassword)
+
     // Protect dashboard route with JWT and Admin Role user
     // apiRoutes.get('/admin', requireAuth, AuthenticationController.roleAuthorization('Admin'), AuthenticationController.adminUsers)
 

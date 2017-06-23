@@ -9,16 +9,12 @@
                 :key="field.name"
             >              
             </form-group-validator>
-            <div 
-                    class="celm-form-tip is-warning"
-                    v-if="fetchError" 
-                >
-                    <div class="celm-form-tip-body">
-                        <p>
-                            <b>{{fetchError.message}}</b>
-                        </p>
-                    </div>
-                </div>
+            <form-messages-handler
+                :error="error"
+                :fetchError="fetchError"
+                :success="success"
+            >
+            </form-messages-handler>
             <button
                 :disabled="!isFullFilled || loading"    
                 class="celm-button"    
@@ -37,6 +33,7 @@
 import {mapState,mapActions} from 'vuex'
 import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
 import FormGroupValidator from '../commons/FormGroupValidator'
+import FormMessagesHandler from '../commons/FormMessagesHandler'
 const formFields = require('../data/loginForm.json')
 const debug = require('debug')('LOGIN =>')
 export default {
@@ -48,7 +45,8 @@ export default {
         }
     },
     components: {
-        FormGroupValidator
+        FormGroupValidator,
+        FormMessagesHandler
     },
     mounted(){
         debug('formFields', formFields)

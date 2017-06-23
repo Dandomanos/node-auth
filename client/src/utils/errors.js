@@ -7,8 +7,16 @@ const errorsObject = {
         'fields': ['email', 'password'],
         'message': 'WRONG EMAIL OR PASSWORD'
     },
+    '2007': {
+        'fields': ['username'],
+        'message': 'USERNAME ALREADY IN USE'
+    },
+    '2009': {
+        'fields': ['password'],
+        'message': 'INCORRECT PASSWORD'
+    },
     'generic': {
-        'message': 'GENERIC ERROR'
+        'message': 'UPS SOMETHING FAILED'
     }
 }
 

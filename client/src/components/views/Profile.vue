@@ -1,22 +1,17 @@
 <template>
     <div class="Profile-container">
-        <h1>Profile</h1>
-        <div class="celm-data-user" v-if="user">
-            <ul>
-                <li><b>ID</b>: {{user._id}}<br></li>
-                <li><b>Username</b>: {{user.username}}<br></li>
-                <li><b>First Name</b>: {{user.firstName}}<br></li>
-                <li><b>Last Name</b>: {{user.lastName}}<br></li>
-                <li><b>Email</b>: {{user.email}}<br></li>
-                <li><b>Role</b>: [{{user.role}}]<br></li>
-            </ul>
-        </div>
+        <user-profile></user-profile>
         <div class="celm-profile-edit">
-            <button class="celm-button" @click="toggleForm()"  v-if="!formVisible">
-                Edit Profile
-            </button>
-            <div 
-            v-else-if="formVisible">
+            <template v-if="state===0">
+                <button class="celm-button" @click="setState(1)">
+                    Edit Profile
+                </button>
+                <button class="celm-button" @click="setState(2)">
+                    Change Password
+                </button>
+            </template>
+            
+            <div v-if="state===1">
                 <h1>Profile Edit Form</h1>
                 <form @submit.prevent="update">
                     <form-group-validator
@@ -26,32 +21,43 @@
                         :key="field.name"
                     >              
                     </form-group-validator>
-
-                    <div  class="celm-form-tip is-warning" v-if="fetchError || error" >
-                        <div class="celm-form-tip-body">
-                            <p v-if="fetchError">
-                                <b>{{fetchError.message}}</b>
-                            </p>
-                            <p v-else-if="error">
-                                <b>{{error.message}}</b>
-                            </p>
-                        </div>
-                    </div>
-                    <div  class="celm-form-tip is-success" v-else-if="profileUpdated" >
-                        <div class="celm-form-tip-body">
-                            <p>
-                                Profile Updated succesfully
-                            </p>
-                        </div>
-                    </div>
+                    <form-messages-handler
+                        :error="error"
+                        :fetchError="fetchError"
+                        :success="success"
+                    >
+                    </form-messages-handler>
                     <button class="celm-button" type="submit" :disabled="!profileFilled || loading"  >
                         Update Profile
                     </button>
-                    <button class="celm-button" type="button" @click="toggleForm()">
-                        Back
+                </form>
+            </div>
+            <div v-else-if="state===2">
+                <h1>Change Password</h1>
+                <form @submit.prevent="updatePassword">
+                    <form-group-validator
+                        :field="field"
+                        :errorFields="errorFields"
+                        v-for="field in passFields"
+                        :key="field.name"
+                    >              
+                    </form-group-validator>
+                    <form-messages-handler
+                        :error="error"
+                        :fetchError="fetchError"
+                        :success="success"
+                    >
+                    </form-messages-handler>
+                    <button class="celm-button" type="submit" :disabled="!passwordFilled || loading"  >
+                        Update Password
                     </button>
                 </form>
             </div>
+            <template v-if="state!=0">
+                <button class="celm-button" type="button" @click="setState(0)">
+                    Back
+                </button>
+            </template>
         </div>
     </div>
 </template>
@@ -60,26 +66,41 @@
 import {mapState,mapActions} from 'vuex'
 import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
 import FormGroupValidator from '../commons/FormGroupValidator'
+import FormMessagesHandler from '../commons/FormMessagesHandler'
+import UserProfile from '../commons/UserProfile'
 // const debug = require('debug')('Profile => ')
 const formFields = require('../data/editProfileForm.json')
+const passFields = require('../data/changePasswordForm.json')
 export default {
     name: 'Profile',
     mixins:[FormValidatorMixin],
     data () {
         return {
-            formVisible:false,
+            state:0,//0 init //1 editprofile //2 changePassword
             formFields,
-            profileUpdated:false
+            passFields
         }
     },
     components: {
-        FormGroupValidator
+        FormGroupValidator,
+        FormMessagesHandler,
+        UserProfile
     },
     methods: {
         toggleForm() {
             this.formVisible = !this.formVisible
             this.autofill()
         },
+        setState(step) {
+            this.state = step
+            this.resetForms()
+            if(step==1)
+                this.autofill()
+
+            // if(step==2)
+            //     this.clearPass()
+        },
+        
         update() {
             //Client Validation
             if(!this.profileFilled) {
@@ -93,17 +114,41 @@ export default {
             if(!this.validateField('name', data.lastName))
                 return this.setError({ message: "Your Lastname can't contains numbres and special letters", fields:['lastName']})
 
-            this.profileUpdated = false
             this.error = null
             this.updateProfile(data)
-            this.profileUpdated = true
+            this.setSuccess({message:'Profile updated successfully'})
+
+        },
+        updatePassword() {
+            if(!this.passwordFilled)
+                return this.setError({ message: 'You must fill all fields', fields:['all']})
+
+            let data = this.getFormData(this.passFields)
+
+            if(!this.validateField('password', data.password))
+                return this.setError({ message: 'Your Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter and one number', fields:['password']})
+
+            if(!this.validateField('password', data.newPassword))
+                return this.setError({ message: 'Your Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter and one number', fields:['newPassword']})
+            
+            if(data.newPassword!==data.confirmNewPassword)
+                return this.setError({ message: 'Your passwords do not match', fields:['newPassword', 'confirmNewPassword']})
+
+            this.error = null
+            this.changePassword(data)
+            this.setSuccess({message:'Profile updated successfully'})
+
         },
         autofill() {
             if(this.user && this.formFields)
                 this.formFields = this.formFields.map( item => Object.assign({}, item, {model:this.user[item.name]}))
         },
+        clearPass() {
+            this.passFields = this.passFields.map(item =>  Object.assign({}, item, {model:''}))
+        },
         ...mapActions({
-            updateProfile:'auth/UPDATE'
+            updateProfile:'auth/UPDATE',
+            changePassword:'auth/CHANGE_PASSWORD'
         })
     },
     computed: {
@@ -112,6 +157,9 @@ export default {
         }),
         profileFilled() {
             return this.fullFilled(this.formFields)
+        },
+        passwordFilled() {
+            return this.fullFilled(this.passFields)
         }
     },
 }
@@ -119,18 +167,8 @@ export default {
 
 <style lang="scss">
 @import '../../assets/scss/_const.scss';
-.celm-data-user {
-    display: flex;
-    align-items: center;
-    ul {
-        border:$profile-border;
-        margin: 0 auto;
-        text-align: left;
-        padding:$profile-padding;
-    }
-}
 .celm-profile-edit {
-    margin:$profile-padding auto;
-    padding:$profile-padding;
+margin:$profile-padding auto;
+padding:$profile-padding;
 }
 </style>
