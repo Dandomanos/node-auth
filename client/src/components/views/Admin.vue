@@ -36,7 +36,7 @@
                     {{user.firstName}} {{user.lastName}} 
                     </div>
                     <div class="column is-4">
-                        <small>{{user.email}}] <b>[{{user.role}}]</b></small> 
+                        <small>{{user.email}} <b>[{{user.role}}]</b></small> 
                     </div>
                     <div class="column is-1">
                         <b v-if="user.emailActive" class="is-success">V</b>
@@ -96,6 +96,10 @@ export default {
             &.is-head {
                 background-color:$button-bg-color;
                 color:$button-font-color;
+                font-weight:bold;
+                h4 {
+                    color:$button-font-color;
+                }
             }
             &:last-child {
                 border-bottom:none
@@ -104,6 +108,10 @@ export default {
                 border-right:$input-border;
                 &:last-child {
                     border-right:none;
+                }
+                padding:0;
+                @media (min-width:768px) {
+                    padding:$control-panel-padding;
                 }
             }
             h4 {
