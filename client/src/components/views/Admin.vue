@@ -10,14 +10,41 @@
         </div>
         <div class="users" v-if="users">
             <ul>
-                <li v-for="user in users">
-                    <h4>{{user.username}}</h4> 
+                <li class="columns is-head hidden-xs">
+                    <div class="column is-2">
+                        <h4>Username</h4> 
+                    </div>
+                    <div class="column is-4">
+                        Name
+                    </div>
+                    <div class="column is-4">
+                        Email[Role]</small> 
+                    </div>
+                    <div class="column is-1">
+                        Active
+                    </div>
+                    <div class="column is-1">
+                        Games
+                    </div>
+                </li>
+                
+                <li v-for="user in users" class="columns">
+                    <div class="column is-2">
+                        <h4>{{user.username}}</h4> 
+                    </div>
+                    <div class="column is-4">
                     {{user.firstName}} {{user.lastName}} 
-                    <small>[{{user.email}}] <b>{{user.role}}</b> 
-                        <b v-if="user.emailActive" class="is-success">CONFIRMED EMAIL</b>
-                        <b v-else="user.emailActive" class="is-warning">UNVERIFIED EMAIL</b>
-                    </small> 
-                    {{user.games.length}}
+                    </div>
+                    <div class="column is-4">
+                        <small>{{user.email}}] <b>[{{user.role}}]</b></small> 
+                    </div>
+                    <div class="column is-1">
+                        <b v-if="user.emailActive" class="is-success">V</b>
+                        <b v-else="user.emailActive" class="is-warning">X</b>
+                    </div>
+                    <div class="column is-1">
+                        {{user.games.length}}
+                    </div>
                 </li>
             </ul>
         </div>
@@ -65,7 +92,20 @@ export default {
         border:$control-panel-user-border;
         padding:$control-panel-padding;
         li {
-            display:block;
+            border-bottom:$input-border;
+            &.is-head {
+                background-color:$button-bg-color;
+                color:$button-font-color;
+            }
+            &:last-child {
+                border-bottom:none
+            }
+            .column {
+                border-right:$input-border;
+                &:last-child {
+                    border-right:none;
+                }
+            }
             h4 {
                 font-weight:bold;
                 margin:0;

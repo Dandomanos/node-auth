@@ -107,3 +107,10 @@
 .is-success {
     color:$success-color;
 }
+
+//displays 
+.hidden-xs {
+    @media (max-width:767px) {
+        display:none
+    }
+}
