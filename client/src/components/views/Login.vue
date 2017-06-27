@@ -1,26 +1,11 @@
 <template>
     <div class="login" v-if="!user">
         <h1>Login</h1>
-        <form @submit.prevent="submit">
-            <form-group-validator
-                :field="field"
-                :errorFields="errorFields"
-                v-for="field in formFields"
-                :key="field.name"
-            >              
-            </form-group-validator>
-            <form-messages-handler
-                :error="error"
-                :fetchError="fetchError"
-                :success="success"
-            >
-            </form-messages-handler>
-            <button
-                :disabled="!isFullFilled || loading"    
-                class="celm-button"    
-                type="submit"
-            >Enter</button>
-        </form>
+        <form-container
+            :formFields="formFields"
+            :submit="submit"
+            :buttonText="'Enter'"
+        ></form-container>
     </div>
     <div v-else>
         <router-link class="celm-button" :to="'/logout'">
@@ -32,10 +17,9 @@
 <script>
 import {mapState,mapActions} from 'vuex'
 import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
-import FormGroupValidator from '../commons/FormGroupValidator'
-import FormMessagesHandler from '../commons/FormMessagesHandler'
+import FormContainer from '../commons/FormContainer'
 const formFields = require('../data/loginForm.json')
-const debug = require('debug')('LOGIN =>')
+// const debug = require('debug')('LOGIN =>')
 export default {
     name: 'Login',
     mixins:[FormValidatorMixin],
@@ -44,20 +28,16 @@ export default {
             formFields
         }
     },
-    components: {
-        FormGroupValidator,
-        FormMessagesHandler
+    mounted() {
+        this.resetForms()
     },
-    mounted(){
-        debug('formFields', formFields)
+    components: {
+        FormContainer
     },
     computed: {
         ...mapState({
             user: state => state.auth.user
-        }),
-        isFullFilled() {
-            return this.fullFilled(this.formFields)
-        }
+        })
     },
     methods: {
         ...mapActions({

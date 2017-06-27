@@ -5,21 +5,18 @@ export default {
     namespaced:true,
     state: {
         fetchStatus:null,
-        token:null,
         fetchError:null,
+        fetchResult:null,
+        token:null,
         user:null
     },
     mutations: {
         FETCH_STARTED(state) {
             state.fetchStatus = 'fetching'
-            state.token =false
+            state.token = false
             state.fetchError = null
         },
         FETCH_LOGGED_STARTED(state){
-            state.fetchStatus = 'fetching'
-            state.fetchError = null
-        },
-        FETCH_PASSWORD_STARTED(state){
             state.fetchStatus = 'fetching'
             state.fetchError = null
         },
@@ -48,9 +45,19 @@ export default {
             state.fetchStatus = null
             state.fetchError = null
         },
+        CLEAR_RESULT(state) {
+            debug('Clear Result')
+            state.fetchStatus = null
+            state.fetchResult = null
+        },
         SET_FETCH_ERROR(state, error) {
+            debug('error', error)
             state.fetchStatus = 'failed'
             state.fetchError = error && error.data
+        },
+        SET_FETCH_RESULT(state, result) {
+            debug('result', result)
+            state.fetchResult = result
         }
     },
     actions: {
@@ -89,23 +96,19 @@ export default {
             debug('firstName',firstName, 'lastName',lastName)
             try {
                 let data = await api.updateProfile(username,firstName,lastName,state.token)
-                // window.localStorage.setItem('token', data.token)
                 debug('data',data.user)
                 commit('SET_USER', data.user)
-                // commit('SET_TOKEN',data.token)
             } catch(err){
                 commit('SET_FETCH_ERROR', err)
             }
         },
         async CHANGE_PASSWORD({commit,state},{password,newPassword,confirmNewPassword}) {
-            commit('FETCH_PASSWORD_STARTED')
+            commit('FETCH_LOGGED_STARTED')
             debug('password',password, 'newPassword',newPassword, 'confirmNewPassword',confirmNewPassword)
             try {
                 let data = await api.changePassword(password,newPassword,confirmNewPassword,state.token)
-                // window.localStorage.setItem('token', data.token)
                 debug('data',data)
                 commit('PASSWORD_UPDATED')
-                // commit('SET_TOKEN',data.token)
             } catch(err){
                 commit('SET_FETCH_ERROR', err)
             }
@@ -130,6 +133,16 @@ export default {
         },
         CLEAR_ERROR({commit}) {
             commit('CLEAR_ERROR')
+        },
+        CLEAR_RESULT({commit}) {
+            commit('CLEAR_RESULT')
+        },
+        SET_ERROR({commit},{error}) {
+            debug('error', error)
+            commit('SET_FETCH_ERROR', error)
+        },
+        SET_RESULT({commit},{result}) {
+            commit('SET_FETCH_RESULT',result)
         }
     },
     getters:{

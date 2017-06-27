@@ -1,27 +1,29 @@
 <template>
-    <div  class="celm-form-tip is-warning" v-if="fetchError || error" >
+    <div  class="celm-form-tip is-warning" v-if="fetchError" >
         <div class="celm-form-tip-body">
-            <p v-if="fetchError">
+            <p>
                 <b>{{fetchError.message}}</b>
-            </p>
-            <p v-else-if="error">
-                <b>{{error.message}}</b>
             </p>
         </div>
     </div>
-    <div  class="celm-form-tip is-success" v-else-if="success" >
+    <div  class="celm-form-tip is-success" v-else-if="fetchSuccess">
         <div class="celm-form-tip-body">
             <p>
-                <b>{{success.message}}</b>
+                <b>{{fetchSuccess.message}}</b>
             </p>
         </div>
     </div>
 </template>
 
 <script>
-
+import {mapState} from 'vuex'
 export default {
     name: 'form-messages-handler',
-    props:['error', 'fetchError', 'success']
+    computed:{
+        ...mapState({
+            fetchError: state => state.auth.fetchError,
+            fetchSuccess: state => state.auth.fetchResult
+        }),
+    }
 }
 </script>

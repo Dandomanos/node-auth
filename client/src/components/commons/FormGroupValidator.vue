@@ -33,9 +33,11 @@
 
 <script>
 // const debug = require('debug')('FormGroupValidator =>')
+import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
 export default {
     name: 'FormGroupValidator',
-    props: ['field', 'errorFields','inputType'],
+    mixins:[FormValidatorMixin],
+    props: ['field', 'inputType'],
     computed:{
         hasError() {
             return Object.prototype.toString.call( this.errorFields ) === '[object Array]' ? this.errorFields.map(item => item === this.field.name || item === 'all').filter(Boolean)[0] : false
