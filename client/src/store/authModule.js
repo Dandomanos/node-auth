@@ -5,14 +5,19 @@ export default {
     namespaced:true,
     state: {
         fetchStatus:null,
-        token:null,
         fetchError:null,
+        fetchResult:null,
+        token:null,
         user:null
     },
     mutations: {
         FETCH_STARTED(state) {
-            state.fechStatus = 'fetching'
+            state.fetchStatus = 'fetching'
             state.token = false
+            state.fetchError = null
+        },
+        FETCH_LOGGED_STARTED(state){
+            state.fetchStatus = 'fetching'
             state.fetchError = null
         },
         SET_TOKEN(state, token) {
@@ -21,6 +26,9 @@ export default {
         },
         SET_USER(state,user) {
             state.user = user
+            state.fetchStatus = 'success'
+        },
+        PASSWORD_UPDATED(state) {
             state.fetchStatus = 'success'
         },
         GET_TOKEN(state) {
@@ -32,9 +40,24 @@ export default {
             state.token = false
             state.fetchStatus = null
         },
+        CLEAR_ERROR(state) {
+            debug('Clear Error')
+            state.fetchStatus = null
+            state.fetchError = null
+        },
+        CLEAR_RESULT(state) {
+            debug('Clear Result')
+            state.fetchStatus = null
+            state.fetchResult = null
+        },
         SET_FETCH_ERROR(state, error) {
+            debug('error', error)
             state.fetchStatus = 'failed'
             state.fetchError = error && error.data
+        },
+        SET_FETCH_RESULT(state, result) {
+            debug('result', result)
+            state.fetchResult = result
         }
     },
     actions: {
@@ -47,9 +70,8 @@ export default {
             }
         },
         async GET_USER({commit,state}) {
-            // commit('FETCH_STARTED')
+            commit('FETCH_LOGGED_STARTED')
             try {
-                debug('token from state', state.token)
                 let data = await api.getUser(state.token)
                 debug('users',data.users)
                 commit('SET_USER', data.user)
@@ -69,11 +91,33 @@ export default {
                 commit('SET_FETCH_ERROR', err)
             }
         },
-        async REGISTER({commit},{email,password,firstName,lastName}) {
+        async UPDATE({commit,state},{username,firstName,lastName}) {
+            commit('FETCH_LOGGED_STARTED')
+            debug('firstName',firstName, 'lastName',lastName)
+            try {
+                let data = await api.updateProfile(username,firstName,lastName,state.token)
+                debug('data',data.user)
+                commit('SET_USER', data.user)
+            } catch(err){
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async CHANGE_PASSWORD({commit,state},{password,newPassword,confirmNewPassword}) {
+            commit('FETCH_LOGGED_STARTED')
+            debug('password',password, 'newPassword',newPassword, 'confirmNewPassword',confirmNewPassword)
+            try {
+                let data = await api.changePassword(password,newPassword,confirmNewPassword,state.token)
+                debug('data',data)
+                commit('PASSWORD_UPDATED')
+            } catch(err){
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async REGISTER({commit},{username,email,password,firstName,lastName}) {
             commit('FETCH_STARTED')
             try {
                 debug('email',email, 'password', password, 'firstName', firstName, 'lastName',lastName)
-                let data = await api.register(email,password,firstName,lastName)
+                let data = await api.register(username,email,password,firstName,lastName)
                 window.localStorage.setItem('token', data.token)
                 debug('user',data.user)
                 commit('SET_USER', data.user)
@@ -86,6 +130,19 @@ export default {
             debug('clear token')
             window.localStorage.removeItem('token')
             commit('CLEAR_TOKEN')
+        },
+        CLEAR_ERROR({commit}) {
+            commit('CLEAR_ERROR')
+        },
+        CLEAR_RESULT({commit}) {
+            commit('CLEAR_RESULT')
+        },
+        SET_ERROR({commit},{error}) {
+            debug('error', error)
+            commit('SET_FETCH_ERROR', error)
+        },
+        SET_RESULT({commit},{result}) {
+            commit('SET_FETCH_RESULT',result)
         }
     },
     getters:{

@@ -1,6 +1,8 @@
 <template>
     <div class="home">
-        <h1>{{title}}</h1>
+        <div class="home-title">
+            <h1>{{title}}</h1>
+        </div>
         <img src="../../assets/logo.png">
         <div class="user" v-if="user">
             {{user.email}}
@@ -8,12 +10,12 @@
         <div class="actions" v-else>
             <ul>
                 <li>
-                    <router-link :to="'/login'" class="primary-button">
+                    <router-link :to="'/login'" class="celm-button">
                         I have an account
                     </router-link>
                 </li>
                 <li>
-                    <router-link :to="'/register'" class="primary-button">
+                    <router-link :to="'/register'" class="celm-button">
                         I'm new
                     </router-link>
                 </li>
@@ -41,12 +43,3 @@ export default {
     }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
-h1, h2 {
-  font-weight: normal;
-  margin:1rem;
-}
-
-</style>

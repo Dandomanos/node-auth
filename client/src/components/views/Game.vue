@@ -1,9 +1,9 @@
 <template>
-    <div class="gameContainer">
-        <div class="toolbar">
-            <button @click="createDesk()" class="primary-button is-toolbar">New Desk</button>
+    <div class="celm-gameContainer">
+        <div class="celm-toolbar">
+            <button @click="createDesk()" class="celm-button is-toolbar">New Desk</button>
         </div>
-        <div class="game">  
+        <div class="celm-game">  
             <card v-for="card in desk" :type="card.type" :number="card.number" :key="card.number+card.type"></card>
         </div>
     </div>
@@ -42,30 +42,17 @@ export default {
 </script>
 
 <style lang="scss">
-.gameContainer {
-    margin: 1rem auto;
-    padding: 1rem;
+@import '../../assets/scss/_const.scss';
+.celm-gameContainer {
+    margin: $game-margin auto;
+    padding: $game-margin;
 }
-.game {
+.celm-game {
     width:100%;
-    max-width:50rem;
+    max-width:$game-max-width;
     margin:0 auto;
-    height:50rem;
-    border:1px solid #ccc;
+    height:$game-max-height;
+    border:$game-border;
     position:relative;
-    .player {
-        width:5rem;
-        height:5rem;
-        border:1px solid rgba(#ccc,0.5);
-        position:absolute;
-        &.player1 {
-            top:0;
-            background-color:red;
-        }
-        &.player2 {
-            bottom:0;
-            background-color:blue;
-        }
-    }
 }
 </style>

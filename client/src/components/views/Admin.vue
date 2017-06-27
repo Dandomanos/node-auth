@@ -1,17 +1,23 @@
 <template>
-    <div class="control-panel" v-if="isAdmin">
-        <div class="toolbar">
-            <button class="primary-button is-toolbar" @click="createGame" >
+    <div class="celm-control-panel" v-if="isAdmin">
+        <div class="celm-toolbar">
+            <button class="celm-button is-toolbar" @click="createGame" >
                 Create Game
             </button>
-            <button class="primary-button is-toolbar" @click="getUsers">
+            <button class="celm-button is-toolbar" @click="getUsers">
                 Get Users
             </button>
         </div>
         <div class="users" v-if="users">
             <ul>
                 <li v-for="user in users">
-                    <b>{{user.firstName}} {{user.lastName}}</b> {{user.email}} <small>[{{user.role}}]</small>
+                    <h4>{{user.username}}</h4> 
+                    {{user.firstName}} {{user.lastName}} 
+                    <small>[{{user.email}}] <b>{{user.role}}</b> 
+                        <b v-if="user.emailActive" class="is-success">CONFIRMED EMAIL</b>
+                        <b v-else="user.emailActive" class="is-warning">UNVERIFIED EMAIL</b>
+                    </small> 
+                    {{user.games.length}}
                 </li>
             </ul>
         </div>
@@ -51,14 +57,20 @@ export default {
 }
 </script>
 <style lang="scss">
-.control-panel{
-    margin:1rem auto;
-    padding:1rem;
+@import '../../assets/scss/_const.scss';
+.celm-control-panel{
+    margin:$control-panel-margin auto;
+    padding:$control-panel-padding;
     .users {
-        border:1px solid #ccc;
-        padding:1rem;
+        border:$control-panel-user-border;
+        padding:$control-panel-padding;
         li {
             display:block;
+            h4 {
+                font-weight:bold;
+                margin:0;
+                display:inline-block;
+            }
         }
     }
 }

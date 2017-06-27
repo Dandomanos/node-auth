@@ -28,20 +28,22 @@ export default {
 }
 </script>
 <style lang="scss">
+@import '../../assets/scss/_const.scss';
 .cardContainer {
-    width:10%;
-    padding:2px;
+    width:$card-width;
+    padding:$card-air;
     display:inline-block;
 }
 .card {
     background-color:white;
     width:100%;
-    height:90px;
-    border-radius:3px;
-    border:1px solid #ccc;
+    height:$card-height;
+    border-radius:$card-radius;
+    border:$card-border;
     overflow:hidden;
     position:relative;
     &.isHidden {
+        //add background for hide card
         background-color:blue;
         .bg-card {
             display:none;

@@ -21,27 +21,27 @@ export default {
 }
 </script>
 <style lang="scss">
-$primary: #42b983;
+@import '../../assets/scss/_const.scss';
 header {
-    padding:1rem;
-    background-color:lighten($primary,40);
+    padding:$header-padding;
+    background-color:$header-bg-color;
     ul {
         list-style-type: none;
         padding: 0;
         li {
             display: inline-block;
-            margin: 0 10px;
+            margin: $header-list-margin;
             a {
-                color:darken($primary,15);
+                color:$header-font-color;
                 font-weight:bold;
             }
         }
     }
 
     .user {
-        margin-top:1rem;
-        background-color: white;
-        padding: 1rem;
+        margin-top:$header-padding;
+        background-color: $background-color;
+        padding: $header-padding;
     }
 }
 </style>

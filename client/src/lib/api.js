@@ -1,4 +1,5 @@
 import axios from 'axios'
+import {getErrorObject} from '../utils/errors'
 
 const debug = require('debug')('API')
 
@@ -9,6 +10,7 @@ const API_URL = BASE_URL
 //Error resonse wrapper
 export class ApiError extends Error{
     constructor(data) {
+        debug('ApiError', data)
         if(!data || typeof data!=='object')
             data = {}
         if(!data.msg)
@@ -17,12 +19,14 @@ export class ApiError extends Error{
         data.code |=0
         if(!data.code)
             data.code = -1
-
+        debug('ApiError before super')
         super(data.msg)
         this.name = this.constructor.name
         this.code = data.code|0
         this.data = data
+
     }
+
 }
 
 //Axios instance
@@ -88,6 +92,10 @@ function handleResponse(err, response) {
     if(!response.data || response.data.status !== true) {
         let errorData = response.data && response.data.error
         debug('response-error', errorData)
+        Object.assign(errorData, getErrorObject(errorData.code))
+        debug('response-error handle', errorData)
+
+
         return Promise.reject(new ApiError(errorData))
     }
 
@@ -96,13 +104,48 @@ function handleResponse(err, response) {
     return response.data.data
 }
 
+/* UNLOGGED END POINTS */
+
 export function authenticate(email, password) {
     return request.post('/login', {email, password})
 }
 
-export function register(email,password,firstName,lastName) {
-    return request.post('/register', {email,password,firstName,lastName})
+
+export function register(username,email,password,firstName,lastName) {
+    return request.post('/register', {username,email,password,firstName,lastName})
 }
+
+
+/* AUTH END POINTS */
+
+export function updateProfile(username,firstName, lastName, token) {
+    debug('FN',firstName, 'LN', lastName)
+    return request({
+        url:'api/updateProfile',
+        method: 'POST',
+        token,
+        data: {
+            username,
+            firstName,
+            lastName
+        }
+    })
+}
+
+export function changePassword(password,newPassword, confirmNewPassword, token) {
+    debug('pass',password, 'new pass', newPassword)
+    return request({
+        url:'api/changePassword',
+        method: 'POST',
+        token,
+        data: {
+            password,
+            newPassword,
+            confirmNewPassword
+        }
+    })
+}
+
 
 export function getUser(token) {
     debug('request Token', token)

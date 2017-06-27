@@ -36,7 +36,7 @@ export default {
             let current = this.$route.name
             if(this.isLogged) {
                 debug('is logged', this.isLogged)
-                if(current == 'Login')
+                if(current == 'Login' || 'Register')
                     this.$router.replace({name:'Profile'})
             } else {
                 debug('not logged')
@@ -60,87 +60,5 @@ export default {
 
 <style lang="scss">
 @import '~bulma/bulma.sass';
-#app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-}
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-h1 {
-    color: #2e815b;
-    font-weight:bold;
-    font-size:2rem;
-}
-.primary-button {
-    display:block;
-    width:100%;
-    max-width:20rem;
-    padding:0.5rem 1rem;
-    background-color:#d6f1e5;
-    margin:0.5rem auto;
-    color:#2e815b;
-    font-weight:bold;
-    text-decoration:none;
-    -webkit-appearance: none;
-    appearance:none;
-    border:none;
-    box-shadow:none;
-    font-size:1rem;
-    &.is-toolbar {
-        width:auto;
-        display:inline-block;
-        font-size:0.8rem;
-    }
-    &:hover {
-        background-color:#2e815b;
-        color:#d6f1e5;
-    }
-    &:focus {
-        outline:none;
-    }
-}
-.form-group {
-    margin-bottom:1rem;
-}
-.primary-input {
-    width:100%;
-    max-width:20rem;
-    padding:0.5rem 1rem;
-    background-color:lighten(#d6f1e5,8);
-    box-shadow:none;
-    outline:none;
-    border:1px solid #ddd;
-    &:focus {
-        outline:none;
-    }
-}
-form {
-    width:100%;
-    max-width:20rem;
-    margin:0 auto;
-}
-.form-group {
-    label {
-        display:block;
-        text-align:left;
-        font-size:1rem;
-        font-weight:bold;
-    }
-}
-.hero.is-fullheight .hero-body {
-    position:relative;
-    .container {
-        position:initial;
-    }
-}
-.toolbar {
-    position:absolute;
-    top:1rem;
-}
+@import './assets/scss/main.scss';
 </style>

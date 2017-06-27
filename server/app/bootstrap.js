@@ -11,6 +11,7 @@ require('./exceptions')
 
 module.exports = app => {
     expressDeliver(app,{
+        exceptionPool: require('./exceptions'),
         printErrorStack: true, //Default: false 
         printInternalErrorData: true //Default: false * 
     })
