@@ -8,6 +8,7 @@ import Register from '@/components/views/Register.vue'
 import store from '../store/index'
 import Game from '@/components/views/Game.vue'
 import Admin from '@/components/views/Admin.vue'
+import Recover from '@/components/views/Recover.vue'
 
 Vue.use(Router)
 
@@ -50,6 +51,12 @@ const router = new Router({
             path: '/logout',
             name: 'Logout',
             component: Logout,
+            meta:{requiredAuth:false}
+        },
+        {
+            path: '/recover',
+            name: 'Recover',
+            component: Recover,
             meta:{requiredAuth:false}
         },
         {

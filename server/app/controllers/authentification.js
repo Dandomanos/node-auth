@@ -5,6 +5,19 @@ const config = require('../config/main')
 const fs = require('fs-extra')
 const path = require('path')
 const expressDeliver = require('express-deliver')
+const generator = require('generate-password');
+
+//NODEMAILER
+const nodemailer = require('nodemailer')
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'infocelmmessenger@gmail.com',
+    pass: 'Man12125'
+  }
+})
+
+
 
 
 function generateToken(user) {
@@ -177,6 +190,47 @@ exports.changePassword = function*(req, res, next) {
 
 }
 
+//========================================
+// Generate new Password
+//========================================
+exports.recoverPass = function*(req, res, next) {
+    console.log('starting recovering pass', req.body)
+    const email = req.body.email
+
+    if(!email)
+        throw new res.exception.UsernameNeeded()
+
+    let user = yield User.findOne({ email: email })
+
+    if(!user) {
+        throw new res.exception.EmailNotFound()
+    }
+
+    let newPass =  generator.generate({ length: 10, numbers: true })
+
+    user.password = newPass
+    let userSaved = yield user.save()
+
+    let mailOptions = {
+        from: 'info@celm.com',
+        to: email,
+        subject: 'CELM => New Password Generated',
+        html: 'Hi ' + email + ' your new password has been generated<br><br>' + '<b>' + newPass + '</b>'
+    }
+
+    let sended = yield transporter.sendMail(mailOptions)
+
+    if(!sended) {
+        throw new res.exception.ShippingFailed()
+    }
+
+    console.log('Email sent: ' + sended.response)
+
+    return {
+        // user: setUserInfo(user),
+        message:'Password Generated Succesfully'
+    }
+}
 //========================================
 // Registration Route
 //========================================

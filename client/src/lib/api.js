@@ -115,6 +115,10 @@ export function register(username,email,password,firstName,lastName) {
     return request.post('/register', {username,email,password,firstName,lastName})
 }
 
+export function recoverPass(email) {
+    return request.post('/recover', {email})
+}
+
 
 /* AUTH END POINTS */
 

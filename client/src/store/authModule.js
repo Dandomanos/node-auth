@@ -28,6 +28,9 @@ export default {
             state.user = user
             state.fetchStatus = 'success'
         },
+        SET_SUCCESS(state) {
+            state.fetchStatus = 'success'
+        },
         PASSWORD_UPDATED(state) {
             state.fetchStatus = 'success'
         },
@@ -123,6 +126,17 @@ export default {
                 commit('SET_USER', data.user)
                 commit('SET_TOKEN',data.token)
             } catch(err){
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async RECOVER_PASSWORD({commit}, {email}) {
+            commit('FETCH_STARTED')
+            try {
+                debug('email',email)
+                let data = await api.recoverPass(email)
+                debug('pass recovered', data)
+                commit('SET_SUCCESS')
+            } catch(err) {
                 commit('SET_FETCH_ERROR', err)
             }
         },

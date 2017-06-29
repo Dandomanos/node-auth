@@ -87,8 +87,8 @@ export default {
 
             let data = this.getFormData(this.passFields)
 
-            if(!this.validateField('password', data.password))
-                return this.setError('PASSWORD_INVALID')
+            // if(!this.validateField('password', data.password))
+            //     return this.setError('PASSWORD_INVALID')
 
             if(!this.validateField('password', data.newPassword))
                 return this.setError('NEW_PASSWORD_INVALID')

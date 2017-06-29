@@ -6,12 +6,13 @@
             :key="field.name"
         >              
         </form-group-validator>
-        <form-messages-handler
+        <form-messages-handler v-if="!loading"
         >
         </form-messages-handler>
         <button
-            :disabled="!isFullFilled || loading"    
-            class="celm-button"    
+            :disabled="!isFullFilled"
+            :class="{ 'is-loading': loading }"
+            class="button celm-button"    
             type="submit"
         >{{buttonText}}</button>
     </form>

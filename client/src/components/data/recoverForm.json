@@ -1,0 +1,9 @@
+[
+    {
+        "name": "email",
+        "label": "Email",
+        "placeHolder": "Enter your email",
+        "model": "",
+        "type": "email"
+    }
+]

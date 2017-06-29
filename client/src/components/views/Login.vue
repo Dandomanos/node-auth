@@ -6,6 +6,9 @@
             :submit="submit"
             :buttonText="'Enter'"
         ></form-container>
+        <router-link class="celm-link" :to="'/recover'">
+                Forgot your password
+        </router-link>
     </div>
     <div v-else>
         <router-link class="celm-button" :to="'/logout'">

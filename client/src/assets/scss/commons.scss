@@ -48,6 +48,7 @@
 .celm-button {
     display:block;
     width:100%;
+    border-radius:$border-radius;
     max-width:$button-max-width;
     padding:$button-padding;
     background-color:$button-bg-color;
@@ -60,14 +61,22 @@
     box-shadow:none;
     font-size:$base-fs;
     cursor:pointer;
-    &:disabled {
-        opacity:0.5;
-        cursor: not-allowed;
+    &:focus, &.is-focused {
+        box-shadow:none;
+        color:$button-font-color;
+        border:none;
     }
     &.is-toolbar {
         width:auto;
         display:inline-block;
         font-size:$base-fs*0.8;
+    }
+    &.is-loading {
+        &::after {
+            border-color:$button-font-color;
+            border-right-color: transparent;
+            border-top-color: transparent;
+        }
     }
     &:hover {
         background-color:$button-font-color;;

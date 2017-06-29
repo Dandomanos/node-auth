@@ -53,6 +53,16 @@ const exceptionPool = new ExceptionPool({
         message:'Invalid Password',
         statusCode:401
     },
+    EmailNotFound: {
+        code:2010,
+        message:'Email not registered',
+        statusCode:401
+    },
+    ShippingFailed: {
+        code:2011,
+        message:'Email couldn\'t be send' ,
+        statusCode:401
+    }
 })
 
 module.exports = exceptionPool

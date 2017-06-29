@@ -35,6 +35,9 @@ module.exports = app => {
     // Login route
     app.post('/login', requireLogin, AuthenticationController.login)
 
+    // Recover password
+    app.post('/recover', AuthenticationController.recoverPass)
+
     app.use('/api',
         passport.authenticate('jwt', { failWithError:true, session: false }),
         AuthenticationController.authenticationFail
