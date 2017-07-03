@@ -114,14 +114,6 @@ exports.sendConfirmation = function*(req) {
         throw new res.exception.EmailNotFound()
     }
 
-    // user.confirmToken = confirmToken
-
-    // let userSaved = yield user.save()
-
-    // if(!userSaved) {
-    //     throw new res.exception.ErrorUpdating()
-    // }
-
     let replacedUrl = confirmToken.toString().replace(/\./g,':')
     console.log('URL', replacedUrl)
 

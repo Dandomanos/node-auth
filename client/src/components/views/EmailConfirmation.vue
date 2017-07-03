@@ -26,15 +26,11 @@ export default {
     data() {
         return {
             token: '',
-            // confirmation:{}
         }
     },
     mounted(){
         this.token=this.$route.params.token.replace(/\:/g,'.')
-        // let data = 
         this.confirmEmail({token:this.token})
-        // this.setSuccess(this.confirmation.email + ' confirmed succesfully')
-        // this.confirmEmail()
     }
 }
 </script>
