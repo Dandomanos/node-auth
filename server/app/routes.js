@@ -19,15 +19,10 @@ module.exports = app => {
     // Initialize route groups
     const apiRoutes = express.Router()
     expressDeliver(apiRoutes)
-    // const authRoutes = express.Router()
 
     //=========================
-    // Auth Routes
+    // Unauth Routes
     //=========================
-    // Set url for API group routes
-
-    // // Set auth routes as subgroup/middleare to apiRoutes
-    // apiRoutes.use('/auth', authRoutes)
 
     // Registration route
     app.post('/register', AuthenticationController.register)
@@ -41,30 +36,27 @@ module.exports = app => {
     // Confirm email
     app.post('/confirmEmail', AuthenticationController.confirmEmail)
 
+    //=========================
+    // Auth Routes
+    //=========================
+
+    // Protect dashboard route with JWT
     app.use('/api',
         passport.authenticate('jwt', { failWithError:true, session: false }),
         AuthenticationController.authenticationFail
     )
     app.use('/api',apiRoutes)
 
-
-    // Protect dashboard route with JWT
-    apiRoutes.get('/users', AuthenticationController.users)
+    //Protect dashboard route with JWT and Admin Role user
+    apiRoutes.get('/users', AuthenticationController.roleAuthorization('Admin'), AuthenticationController.users)
 
     // Send Confirmation Password
     apiRoutes.get('/sendConfirmationEmail', AuthenticationController.sendConfirmation)
-
-    // Test Data Home
-    apiRoutes.get('/home', AuthenticationController.publicHome)
 
     //Update Profile
     apiRoutes.post('/updateProfile', AuthenticationController.updateProfile)
 
     //Update Profile
     apiRoutes.post('/changePassword', AuthenticationController.changePassword)
-
-    // Protect dashboard route with JWT and Admin Role user
-    // apiRoutes.get('/admin', requireAuth, AuthenticationController.roleAuthorization('Admin'), AuthenticationController.adminUsers)
-
-    
+ 
 }

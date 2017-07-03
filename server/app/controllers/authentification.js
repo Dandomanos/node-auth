@@ -413,13 +413,6 @@ exports.roleAuthorization = role => {
     }
 }
 
-//Public Home
-exports.publicHome = (req, res, next)  => {
-    res.status(200).json({
-        title:'Welcome to home view',
-        content: 'This is the starting view'
-    })
-}
 
 exports.authenticationFail = (err,req,res,next)=>{
     console.log('authentificationFail')
