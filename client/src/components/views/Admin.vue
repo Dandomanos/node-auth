@@ -8,6 +8,17 @@
                 Get Users
             </button>
         </div>
+        <div class="games" v-if="games">
+            <h2>Games Created</h2>
+            <ul>
+                <li v-for="game in games">
+                    {{gameTypes[game.type]}}
+                    <div class="player" v-for="n in game.playersLength">
+                    Player {{n}}
+                    </div>
+                </li>
+            </ul>
+        </div>
         <div class="users" v-if="users">
             <ul>
                 <li class="columns is-head hidden-xs">
@@ -61,7 +72,7 @@ export default {
     name: 'Admin',
     data () {
         return {
-
+            gameTypes:['Carta más alta']
         }
     },
     computed:{
@@ -71,15 +82,23 @@ export default {
         },
         ...mapState({
             users: state => state.users.users,
-        })     
+            games: state => state.admin.games
+        }) 
     },
     methods: {
         createGame() {
             debug('Adding new game')
+            let data = {type:0}
+            this.newGame(data)
         },
         ...mapActions({
-            getUsers:'users/GET_USERS'
+            getUsers:'users/GET_USERS',
+            newGame:'admin/CREATE_GAME',
+            getGames:'admin/GET_GAMES'
         })
+    },
+    mounted(){
+        this.getGames()
     }
 }
 </script>
@@ -119,6 +138,14 @@ export default {
                 margin:0;
                 display:inline-block;
             }
+        }
+    }
+    .games {
+        margin:$base-margin;
+        li {
+            padding:$base-margin;
+            display:inline-block;
+            border:$input-border;
         }
     }
 }

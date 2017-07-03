@@ -1,11 +1,39 @@
 <template>
     <div class="celm-gameContainer" v-if="user && user.emailActive">
+    <div class="celm-games" v-if="games">
+        <h2>GAMES</h2>
+        <ul class="columns is-multiline">
+            <li v-for="game in games" class="column is-6 game">
+                <div class="box">
+                    <div class="title">
+                        <h3>{{gameTypes[game.type]}}</h3>
+                        <small>{{game._id}}</small>
+                    </div>
+                    <div class="columns">
+                        <button
+                            class="button celm-player-button box column is-6"
+                            v-for="n in game.playersLength"
+                            :class="{'freePlace': !game.players[n-1]}"
+                            @click="enterGame(game._id, n-1)"
+                            :disabled="game.players[n-1]"
+                            >
+                            <img src="../../../static/game/user.svg" alt="">
+                            <small v-if="game.players[n-1]">{{game.players[n-1].username}}</small>
+                            <small v-else>Player {{n}}</small>
+                        </button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <!--
         <div class="celm-toolbar">
             <button @click="createDesk()" class="celm-button is-toolbar">New Desk</button>
         </div>
         <div class="celm-game">  
             <card v-for="card in desk" :type="card.type" :number="card.number" :key="card.number+card.type"></card>
         </div>
+    -->
     </div>
     <div v-else>
         You must to confirm your email to play a game.
@@ -27,7 +55,7 @@ import {mapState, mapActions} from 'vuex'
 import Card from '../commons/Card'
 import FormMessagesHandler from '../commons/FormMessagesHandler'
 import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
-// const debug = require('debug')('GAME => ')
+const debug = require('debug')('GAME => ')
 export default {
     name: 'Game',
     components: {
@@ -39,7 +67,8 @@ export default {
         return {
             types:['Oros','Copas', 'Espadas', 'Bastos'],
             numbers: [1,2,3,4,5,6,7,10,11,12],
-            desk:null
+            desk:null,
+            gameTypes:['Carta más alta']
         }
     },
     methods: {
@@ -57,12 +86,27 @@ export default {
         },
         ...mapActions({
             sendEmail:'auth/SEND_CONFIRMATION_EMAIL',
-        }) 
+            getGames:'game/GET_GAMES',
+            setPlayer:'game/SET_PLAYER'
+        }),
+        enterGame(gameId, position) {
+            let data = {
+                gameId:gameId,
+                position:position
+            }
+            debug('gameId',gameId)
+            this.setPlayer(data) 
+        }
+
     },
     computed: {
         ...mapState({
-            user: state => state.auth.user
+            user: state => state.auth.user,
+            games: state => state.game.games
         }),
+    },
+    mounted() {
+        this.getGames()
     }
 }
 </script>
@@ -73,6 +117,19 @@ export default {
     margin: $game-margin auto;
     padding: $game-margin;
 }
+.celm-games {
+    .box {
+        background-color:lighten($button-bg-color, 5)
+    }
+    .celm-player-button {
+        height:auto;
+        flex-direction: column;
+        display: flex;
+        &[disabled]{
+            opacity:1;
+        }
+    }
+}
 .celm-game {
     width:100%;
     max-width:$game-max-width;
@@ -80,5 +137,8 @@ export default {
     height:$game-max-height;
     border:$game-border;
     position:relative;
+}
+.freePlace {
+    opacity:0.5;
 }
 </style>

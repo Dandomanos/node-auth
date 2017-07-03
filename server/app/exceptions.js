@@ -72,6 +72,31 @@ const exceptionPool = new ExceptionPool({
         code:2012,
         message:'Invalid Token' ,
         statusCode:401
+    },
+    CreateGameFailed: {
+        code:2013,
+        message:'Error creating a game' ,
+        statusCode:401
+    },
+    NoGamesCreated: {
+        code:2014,
+        message:'No games created' ,
+        statusCode:401
+    },
+    UnknowGame: {
+        code:2015,
+        message:'Unknow Game' ,
+        statusCode:401
+    },
+    CantPopulateUsers: {
+        code:2016,
+        message:'Failed populating users on a game' ,
+        statusCode:401
+    },
+    Occupied: {
+        code:2017,
+        message:'A player is sitted on this place' ,
+        statusCode:401
     }
 })
 

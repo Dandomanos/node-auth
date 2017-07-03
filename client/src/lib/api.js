@@ -124,6 +124,8 @@ export function confirmEmail(token) {
 }
 
 
+
+
 /* AUTH END POINTS */
 
 export function updateProfile(username,firstName, lastName, token) {
@@ -139,6 +141,8 @@ export function updateProfile(username,firstName, lastName, token) {
         }
     })
 }
+
+
 
 export function changePassword(password,newPassword, confirmNewPassword, token) {
     debug('pass',password, 'new pass', newPassword)
@@ -171,6 +175,29 @@ export function getUser(token) {
     })
 }
 
+export function getGames(token) {
+    debug('request Token', token)
+    return request({
+        url:'/api/games',
+        token
+    })
+}
+
+export function setPlayer(gameId,position,token) {
+    debug('request Token', token)
+    return request({
+        url:'/api/setPlayer',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            position
+        }
+    })
+}
+
+/* ADMIN END POINTS */
+
 export function getUsers(token) {
     debug('request Token', token)
 
@@ -179,4 +206,15 @@ export function getUsers(token) {
         token
     })
         
+}
+
+export function createGame(type, token) {
+    return request({
+        url:'api/createGame',
+        method: 'POST',
+        token,
+        data: {
+            type
+        }
+    })
 }

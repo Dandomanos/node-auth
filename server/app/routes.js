@@ -1,4 +1,5 @@
 const AuthenticationController = require('./controllers/authentification'),
+    GameController = require('./controllers/game'),
     express = require('express'),
     expressDeliver = require('express-deliver'),
     passportService = require('./config/passport'),
@@ -47,8 +48,6 @@ module.exports = app => {
     )
     app.use('/api',apiRoutes)
 
-    //Protect dashboard route with JWT and Admin Role user
-    apiRoutes.get('/users', AuthenticationController.roleAuthorization('Admin'), AuthenticationController.users)
 
     // Send Confirmation Password
     apiRoutes.get('/sendConfirmationEmail', AuthenticationController.sendConfirmation)
@@ -58,5 +57,24 @@ module.exports = app => {
 
     //Update Profile
     apiRoutes.post('/changePassword', AuthenticationController.changePassword)
+
+    //=========================
+    // GAMES Routes
+    //=========================
+
+    // Get Games
+    apiRoutes.get('/games', GameController.getGames)
+
+    // Set Player
+    apiRoutes.post('/setPlayer', GameController.setPlayer)
+
+    //=========================
+    // Admin Routes
+    //=========================
  
+    //Protect dashboard route with JWT and Admin Role user
+    apiRoutes.get('/users', AuthenticationController.users)
+
+    //Protect dashboard route with JWT and Admin Role user
+    apiRoutes.post('/createGame', AuthenticationController.roleAuthorization('Admin'), GameController.createGame)
 }
