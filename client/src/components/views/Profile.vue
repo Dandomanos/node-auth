@@ -1,6 +1,8 @@
 <template>
     <div class="Profile-container">
         <user-profile></user-profile>
+        <div v-if="fetchSuccess" class="celm-profile-edit is-success" v-html="fetchSuccess.message">
+        </div>
         <div class="celm-profile-edit">
             <template v-if="state===0">
                 <button class="celm-button" @click="setState(1)">
@@ -52,6 +54,9 @@ export default {
             formFields,
             passFields
         }
+    },
+    mounted() {
+        this.resetForms()
     },
     components: {
         FormContainer,

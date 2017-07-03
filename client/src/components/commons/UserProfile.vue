@@ -9,6 +9,9 @@
                 <li><b>Last Name</b>: {{user.lastName}}<br></li>
                 <li><b>Email</b>: {{user.email}}<br></li>
                 <li><b>Role</b>: [{{user.role}}]<br></li>
+                <li v-if="!user.emailActive" class="celm-form-tip is-warning">
+                    [You must to validate your email to play a game.]
+                </li>
             </ul>
         </div>
     </div>

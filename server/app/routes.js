@@ -38,6 +38,9 @@ module.exports = app => {
     // Recover password
     app.post('/recover', AuthenticationController.recoverPass)
 
+    // Confirm email
+    app.post('/confirmEmail', AuthenticationController.confirmEmail)
+
     app.use('/api',
         passport.authenticate('jwt', { failWithError:true, session: false }),
         AuthenticationController.authenticationFail
@@ -47,6 +50,9 @@ module.exports = app => {
 
     // Protect dashboard route with JWT
     apiRoutes.get('/users', AuthenticationController.users)
+
+    // Send Confirmation Password
+    apiRoutes.get('/sendConfirmationEmail', AuthenticationController.sendConfirmation)
 
     // Test Data Home
     apiRoutes.get('/home', AuthenticationController.publicHome)

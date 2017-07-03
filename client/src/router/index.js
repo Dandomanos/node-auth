@@ -9,6 +9,7 @@ import store from '../store/index'
 import Game from '@/components/views/Game.vue'
 import Admin from '@/components/views/Admin.vue'
 import Recover from '@/components/views/Recover.vue'
+import EmailConfirmation from '@/components/views/EmailConfirmation.vue'
 
 Vue.use(Router)
 
@@ -57,6 +58,12 @@ const router = new Router({
             path: '/recover',
             name: 'Recover',
             component: Recover,
+            meta:{requiredAuth:false}
+        },
+        {
+            path: '/confirmation/:token',
+            name: 'Confirmation',
+            component: EmailConfirmation,
             meta:{requiredAuth:false}
         },
         {
@@ -113,32 +120,3 @@ router.beforeEach((to,from,next)=>{
 })
 
 export default router
-
-// export default new Router({
-//     routes: [
-//         {
-//             path: '/',
-//             name: 'Home',
-//             component: Home
-//         },
-//         {
-//             path: 'secretquote',
-//             name: 'SecretQuote',
-//             component: SecretQuote
-//         },
-//         {
-//             path: '/login',
-//             name: 'Login',
-//             component: Login
-//         },
-//         {
-//             path: '/signup',
-//             name: 'Signup',
-//             component: Signup
-//         },
-//         {
-//             path: '*',
-//             redirect: '/'
-//         }
-//     ]
-// })

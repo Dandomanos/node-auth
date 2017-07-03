@@ -1,5 +1,5 @@
 <template>
-    <div class="celm-gameContainer">
+    <div class="celm-gameContainer" v-if="user && user.emailActive">
         <div class="celm-toolbar">
             <button @click="createDesk()" class="celm-button is-toolbar">New Desk</button>
         </div>
@@ -7,16 +7,34 @@
             <card v-for="card in desk" :type="card.type" :number="card.number" :key="card.number+card.type"></card>
         </div>
     </div>
+    <div v-else>
+        You must to confirm your email to play a game.
+        <button
+            class="button celm-button"
+            type="button"
+            :class="{'is-loading':loading}"
+            @click="sendEmail()">
+            Send confirmation email
+        </button>
+        <form-messages-handler v-if="!loading">
+        </form-messages-handler>
+    </div>
 </template>
 
 <script>
 // import anime from 'animejs'
+import {mapState, mapActions} from 'vuex'
 import Card from '../commons/Card'
+import FormMessagesHandler from '../commons/FormMessagesHandler'
+import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
+// const debug = require('debug')('GAME => ')
 export default {
     name: 'Game',
     components: {
         Card,
+        FormMessagesHandler
     },
+    mixins: [FormValidatorMixin],
     data () {
         return {
             types:['Oros','Copas', 'Espadas', 'Bastos'],
@@ -36,7 +54,15 @@ export default {
         },
         createDesk() {
             this.desk = this.types.map((type)=>this.createType(type)).reduce((prev, cur) => prev.concat(cur), []).sort(() => (Math.random() - 0.5))
-        }
+        },
+        ...mapActions({
+            sendEmail:'auth/SEND_CONFIRMATION_EMAIL',
+        }) 
+    },
+    computed: {
+        ...mapState({
+            user: state => state.auth.user
+        }),
     }
 }
 </script>

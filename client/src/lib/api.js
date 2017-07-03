@@ -119,6 +119,10 @@ export function recoverPass(email) {
     return request.post('/recover', {email})
 }
 
+export function confirmEmail(token) {
+    return request.post('/confirmEmail', {token})
+}
+
 
 /* AUTH END POINTS */
 
@@ -147,6 +151,14 @@ export function changePassword(password,newPassword, confirmNewPassword, token) 
             newPassword,
             confirmNewPassword
         }
+    })
+}
+
+export function SendConfirmationEmail(token) {
+    return request({
+        url:'api/sendConfirmationEmail',
+        method: 'GET',
+        token
     })
 }
 

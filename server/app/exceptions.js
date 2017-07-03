@@ -62,6 +62,16 @@ const exceptionPool = new ExceptionPool({
         code:2011,
         message:'Email couldn\'t be send' ,
         statusCode:401
+    },
+    ErrorUpdating: {
+        code:2012,
+        message:'Error updating user' ,
+        statusCode:401
+    },
+    InvalidToken: {
+        code:2012,
+        message:'Invalid Token' ,
+        statusCode:401
     }
 })
 

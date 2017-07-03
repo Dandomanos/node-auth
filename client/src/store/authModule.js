@@ -125,6 +125,7 @@ export default {
                 debug('user',data.user)
                 commit('SET_USER', data.user)
                 commit('SET_TOKEN',data.token)
+                commit('SET_FETCH_RESULT',{message:'We just to send an email to ' + email + '.<br>You must to confirm your account to play a game.'})
             } catch(err){
                 commit('SET_FETCH_ERROR', err)
             }
@@ -136,6 +137,28 @@ export default {
                 let data = await api.recoverPass(email)
                 debug('pass recovered', data)
                 commit('SET_SUCCESS')
+            } catch(err) {
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async SEND_CONFIRMATION_EMAIL({commit, state}){
+            commit('FETCH_LOGGED_STARTED')
+            try {
+                let data = await api.SendConfirmationEmail(state.token)
+                debug('Confirmation email sended to ' +  data.email)
+                commit('SET_SUCCESS')
+                commit('SET_FETCH_RESULT',{message:'Confirmation email sended to ' +  data.email})
+            } catch(err) {
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
+        async CONFIRM_EMAIL({commit},{token}){
+            commit('FETCH_LOGGED_STARTED')
+            try {
+                let data = await api.confirmEmail(token)
+                debug(data.email + ' confirmed', data.user)
+                commit('SET_USER', data.user)
+                commit('SET_FETCH_RESULT',{message:data.email + ' confirmed succesfully'})
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)
             }
