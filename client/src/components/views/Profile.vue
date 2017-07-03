@@ -55,9 +55,6 @@ export default {
             passFields
         }
     },
-    mounted() {
-        this.resetForms()
-    },
     components: {
         FormContainer,
         UserProfile

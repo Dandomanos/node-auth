@@ -28,6 +28,7 @@ export default {
     },
     mounted() {
         this.resetForms()
+        this.formFields = this.clearForms(this.formFields)
     },
     methods: {
         ...mapActions({

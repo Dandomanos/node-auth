@@ -11,9 +11,9 @@
             </router-link>
         </li>
         <li v-if="isLogged">
-            <router-link :to="'/profile'">
+            <a @click="goToProfile">
                 Profile
-            </router-link>
+            </a>
         </li>
         <li v-if="isLogged">
             <router-link :to="'/game'">
@@ -39,7 +39,7 @@
 </template>
 <script>
 import {mapActions, mapGetters} from 'vuex'
-
+const debug = require('debug')('navigation')
 export default {
     name: 'Navigation',
     data () {
@@ -49,8 +49,20 @@ export default {
     },
     methods: {
         ...mapActions({
-            logout:'auth/LOGOUT'
-        })
+            logout:'auth/LOGOUT',
+            clearFetchError:'auth/CLEAR_ERROR',
+            clearFetchResult: 'auth/CLEAR_RESULT',
+        }),
+        goToProfile() {
+            this.resetForms()
+            debug('navigation to Profile')
+            this.$router.replace({name:'Profile'})
+        },
+        resetForms() {
+            this.clearFetchError()
+            this.clearFetchResult()
+        }
+        
     },
     computed:{
         ...mapGetters('auth', ['isLogged', 'user']),

@@ -9,7 +9,7 @@
     <div  class="celm-form-tip is-success" v-else-if="fetchSuccess">
         <div class="celm-form-tip-body">
             <p>
-                <b>{{fetchSuccess.message}}</b>
+                <b v-html="fetchSuccess.message"></b>
             </p>
         </div>
     </div>

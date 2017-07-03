@@ -55,6 +55,10 @@ export default {
             this.clearFetchError()
             this.clearFetchResult()
         },
+        clearForms(formFields) {
+            if(formFields)
+                return formFields.map( item => Object.assign({}, item, {model:''}))
+        },
         validateField(type, field) {
             return this.regEx[type].test(field)
         }

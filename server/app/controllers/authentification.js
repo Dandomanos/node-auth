@@ -28,6 +28,23 @@ function decodeToken(token) {
     return jwt.decode(token,config.secret)
 }
 
+function getConfirmOptions(email) {
+    let confirmToken = generateToken(email.toString())
+    let replacedUrl = confirmToken.toString().replace(/\./g,':')
+    let url = config.clientDomain + '/confirmation/' + replacedUrl
+
+    let mailOptions = {
+        from: 'info@celm.com',
+        to: email,
+        subject: 'CELM => Confirm your email',
+        html: 'Hi ' + email +
+                ', just click on the link to active your account.<br><br>' +
+                '<a href="' + url + '" target="_blank"> Activate Account </a>'
+    }
+
+    return mailOptions
+}
+
 //Set user info from request
 function setUserInfo(request) {
     return {
@@ -104,9 +121,6 @@ exports.sendConfirmation = function*(req) {
         throw new res.exception.UserNotFound()
     }
     console.log('email', email)
-    let confirmToken = generateToken(email.toString())
-    console.log('confirmToken', confirmToken)
-
 
     let user = yield User.findOne({ email: email })
 
@@ -114,19 +128,7 @@ exports.sendConfirmation = function*(req) {
         throw new res.exception.EmailNotFound()
     }
 
-    let replacedUrl = confirmToken.toString().replace(/\./g,':')
-    console.log('URL', replacedUrl)
-
-    let url = config.clientDomain + '/confirmation/' + replacedUrl
-
-    let mailOptions = {
-        from: 'info@celm.com',
-        to: email,
-        subject: 'CELM => Confirm your email',
-        html: 'Hi ' + email +
-                ', just click on the link to active your account.<br><br>' +
-                '<a href="' + url + '" target="_blank"> Activate Account </a>'
-    }
+    let mailOptions = getConfirmOptions(email)
 
     let sended = yield transporter.sendMail(mailOptions)
 
@@ -140,9 +142,8 @@ exports.sendConfirmation = function*(req) {
         email:email,
         // confirm:confirmToken
     }
-
-
 }
+
 //========================================
 // Confirm Email
 //========================================
@@ -210,7 +211,7 @@ exports.updateProfile = function*(req, res, next) {
     }
 
     let freeUsername = yield User.findOne({ username: username })
-    // console.log('freeUsername', freeUsername._id, req.user._id)
+
     if(freeUsername && freeUsername._id.toString() !== req.user._id.toString())
         throw new res.exception.UsernameUsed()
 
@@ -264,10 +265,9 @@ exports.changePassword = function*(req, res, next) {
     user.password = newPassword
     let userSaved = yield user.save()
 
-    // let passUpdated = yield User.findOneAndUpdate({ _id: req.user._id },{password:password}) 
-    
-    
-    // console.log('user updated', updatedUser)
+    if(!userSaved)
+        throw new res.exception.ErrorUpdating()
+
     return {
         msg: 'password updated',
         newPass: newPassword
@@ -312,7 +312,6 @@ exports.recoverPass = function*(req, res, next) {
     console.log('Email sent: ' + sended.response)
 
     return {
-        // user: setUserInfo(user),
         message:'Password Generated Succesfully'
     }
 }
@@ -373,19 +372,7 @@ exports.register = function*(req, res, next) {
     console.log('user saved')
 
     //send email for confirmation
-    let confirmToken = generateToken(email.toString())
-    let replacedUrl = confirmToken.toString().replace(/\./g,':')
-    let url = config.clientDomain + '/confirmation/' + replacedUrl
-
-    let mailOptions = {
-        from: 'info@celm.com',
-        to: email,
-        subject: 'CELM => Confirm your email',
-        html: 'Hi ' + email +
-                ', just click on the link to active your account.<br><br>' +
-                '<a href="' + url + '" target="_blank"> Activate Account </a>'
-    }
-
+    let mailOptions = getConfirmOptions(email)
     let sended = yield transporter.sendMail(mailOptions)
 
     if(!sended) {
