@@ -107,14 +107,17 @@ exports.setPlayer = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    console.log('game', game)
+    // console.log('game', game)
     // let placeholder = {};
+    // console.log('placeholder', placeholder)
     // placeholder['players.' + position] = userId;
+    // console.log('placeholder', placeholder)
+    
     // let gameUpdated = yield Game.findOneAndUpdate( { _id: gameId } , { $set: placeholder })
     // if(!gameUpdated)
     //     throw new res.exception.ErrorUpdating()
 
-    
+        
 
     let games = yield Game.find( {} )
     if(!games)
