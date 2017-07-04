@@ -218,3 +218,14 @@ export function createGame(type, token) {
         }
     })
 }
+
+export function deleteGame(gameId, token) {
+    return request({
+        url:'api/deleteGame',
+        method: 'POST',
+        token,
+        data: {
+            gameId
+        }
+    })
+}

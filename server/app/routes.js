@@ -77,4 +77,6 @@ module.exports = app => {
 
     //Protect dashboard route with JWT and Admin Role user
     apiRoutes.post('/createGame', AuthenticationController.roleAuthorization('Admin'), GameController.createGame)
+
+    apiRoutes.post('/deleteGame', AuthenticationController.roleAuthorization('Admin'), GameController.deleteGame)
 }

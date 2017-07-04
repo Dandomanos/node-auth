@@ -44,6 +44,15 @@ export default {
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)                
             }
+        },
+        async DELETE_GAME({commit, rootState}, {gameId}) {
+            commit('FETCH_STARTED')
+            try {
+                let data = await api.deleteGame(gameId, rootState.auth.token)
+                commit('SET_GAMES', data.games)
+            } catch(err) {
+                commit('SET_FETCH_ERROR', err)
+            }
         }
     },
     getters:{

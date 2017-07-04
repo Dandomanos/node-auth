@@ -13,8 +13,12 @@
             <ul>
                 <li v-for="game in games">
                     {{gameTypes[game.type]}}
+                    <button class="delete" @click="deleteGame({gameId:game._id})"></button>
                     <div class="player" v-for="n in game.playersLength">
-                    Player {{n}}
+                    <h4 v-if="game.players[n-1]">
+                        {{game.players[n-1].username}}
+                    </h4>
+                    <small v-else>Player {{n}}</small>
                     </div>
                 </li>
             </ul>
@@ -94,7 +98,8 @@ export default {
         ...mapActions({
             getUsers:'users/GET_USERS',
             newGame:'admin/CREATE_GAME',
-            getGames:'admin/GET_GAMES'
+            getGames:'admin/GET_GAMES',
+            deleteGame: 'admin/DELETE_GAME'
         })
     },
     mounted(){

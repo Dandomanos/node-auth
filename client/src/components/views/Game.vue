@@ -12,7 +12,7 @@
                     <div class="columns">
                         <button
                             class="button celm-player-button box column is-6"
-                            v-for="n in game.playersLength"
+                            v-for="n in game.players.length"
                             :class="{'freePlace': !game.players[n-1]}"
                             @click="enterGame(game._id, n-1)"
                             :disabled="game.players[n-1]"
@@ -122,7 +122,7 @@ export default {
         background-color:lighten($button-bg-color, 5)
     }
     .celm-player-button {
-        height:auto;
+        height:100%;
         flex-direction: column;
         display: flex;
         &[disabled]{

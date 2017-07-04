@@ -97,6 +97,11 @@ const exceptionPool = new ExceptionPool({
         code:2017,
         message:'A player is sitted on this place' ,
         statusCode:401
+    },
+    DeleteGameFailed: {
+        code:2018,
+        message:'Fail deleting a game' ,
+        statusCode:401
     }
 })
 
