@@ -9,16 +9,17 @@
                         <h3>{{gameTypes[game.type]}}</h3>
                         <small>{{game._id}}</small>
                     </div>
-                    <div class="columns">
+                    <div class="columns is-mobile">
                         <button
                             class="button celm-player-button box column is-6"
                             v-for="n in game.players.length"
-                            :class="{'freePlace': !game.players[n-1]}"
+                            :class="{'freePlace': game.players[n-1].role==='Phantom'}"
                             @click="enterGame(game._id, n-1)"
-                            :disabled="game.players[n-1]"
+                            :disabled="game.players[n-1].role!=='Phantom'"
                             >
+                            
                             <img src="../../../static/game/user.svg" alt="">
-                            <small v-if="game.players[n-1]">{{game.players[n-1].username}}</small>
+                            <small v-if="game.players[n-1].role!=='Phantom'">{{game.players[n-1].username}}</small>
                             <small v-else>Player {{n}}</small>
                         </button>
                     </div>

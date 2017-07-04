@@ -15,9 +15,9 @@
                     {{gameTypes[game.type]}}
                     <button class="delete" @click="deleteGame({gameId:game._id})"></button>
                     <div class="player" v-for="n in game.players.length">
-                    <h4 v-if="game.players[n-1]">
-                        {{game.players[n-1].username}}
-                    </h4>
+                    <small v-if="game.players[n-1].role!=='Phantom'">
+                        <b>{{game.players[n-1].username}}</b>
+                    </small>
                     <small v-else>Player {{n}}</small>
                     </div>
                 </li>
@@ -143,6 +143,7 @@ export default {
                 margin:0;
                 display:inline-block;
             }
+            
         }
     }
     .games {
@@ -151,6 +152,11 @@ export default {
             padding:$base-margin;
             display:inline-block;
             border:$input-border;
+        }
+        .player {
+            small b {
+                color:$primary-color;
+            }
         }
     }
 }

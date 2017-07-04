@@ -38,7 +38,9 @@ exports.createGame = function*(req, res) {
         type:type,
         players: new Array(players[type])
     })
-    
+
+    //create phantoms user
+    game.players = game.players.map(()=>mongoose.Types.ObjectId('595b701b07770e46038c5877'))
 
     console.log('creating game', game)
 
@@ -49,6 +51,10 @@ exports.createGame = function*(req, res) {
     let games = yield Game.find( {} )
     if(!games)
         throw new res.exception.NoGamesCreated()
+
+    let populated = yield User.populate(games, {path: "players"})
+    if(!populated)
+        throw new res.exception.CantPopulateUsers()
 
     return {
             message:'game created',
@@ -95,29 +101,21 @@ exports.setPlayer = function*(req, res) {
     if(!game)
         throw new res.exception.UnknowGame()
 
-    if(game.players[position])
+    let popGame = yield User.populate(game, {path: "players"})
+    if(!popGame)
+        throw new res.exception.CantPopulateUsers()
+
+    if(game.players[position].role!=='Phantom')
         throw new res.exception.Occupied()
 
-    // game.players.set(position, userId)
-    // doc.array.set(index, value);
-    
     game.players[position] = userId
     game.markModified('players')
+
     let saved = yield game.save()
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    // console.log('game', game)
-    // let placeholder = {};
-    // console.log('placeholder', placeholder)
-    // placeholder['players.' + position] = userId;
-    // console.log('placeholder', placeholder)
-    
-    // let gameUpdated = yield Game.findOneAndUpdate( { _id: gameId } , { $set: placeholder })
-    // if(!gameUpdated)
-    //     throw new res.exception.ErrorUpdating()
-
-        
+ 
 
     let games = yield Game.find( {} )
     if(!games)
