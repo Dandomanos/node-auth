@@ -18,11 +18,6 @@ const Game0Schema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'User'
         }]
-    },
-    playersLength: {
-        type: Number,
-        enum:[2],
-        default:2
     }
 })
 

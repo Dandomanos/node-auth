@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 import auth from './authModule'
 import users from './usersDataModule'
-import admin from './adminModule'
+// import admin from './adminModule'
 import game from './gameModule'
 
 export default new Vuex.Store({
@@ -21,7 +21,7 @@ export default new Vuex.Store({
     modules: {
         auth,
         users,
-        admin,
+        // admin,
         game
     }
 })

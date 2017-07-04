@@ -13,8 +13,12 @@
             <ul>
                 <li v-for="game in games">
                     {{gameTypes[game.type]}}
-                    <div class="player" v-for="n in game.playersLength">
-                    Player {{n}}
+                    <button class="delete" @click="deleteGame({gameId:game._id})"></button>
+                    <div class="player" v-for="n in game.players.length">
+                    <small v-if="game.players[n-1].role!=='Phantom'">
+                        <b>{{game.players[n-1].username}}</b>
+                    </small>
+                    <small v-else>Player {{n}}</small>
                     </div>
                 </li>
             </ul>
@@ -82,7 +86,7 @@ export default {
         },
         ...mapState({
             users: state => state.users.users,
-            games: state => state.admin.games
+            games: state => state.game.games
         }) 
     },
     methods: {
@@ -93,8 +97,9 @@ export default {
         },
         ...mapActions({
             getUsers:'users/GET_USERS',
-            newGame:'admin/CREATE_GAME',
-            getGames:'admin/GET_GAMES'
+            newGame:'game/CREATE_GAME',
+            getGames:'game/GET_GAMES',
+            deleteGame: 'game/DELETE_GAME'
         })
     },
     mounted(){
@@ -138,6 +143,7 @@ export default {
                 margin:0;
                 display:inline-block;
             }
+            
         }
     }
     .games {
@@ -146,6 +152,11 @@ export default {
             padding:$base-margin;
             display:inline-block;
             border:$input-border;
+        }
+        .player {
+            small b {
+                color:$primary-color;
+            }
         }
     }
 }
