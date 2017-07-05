@@ -175,10 +175,11 @@ export function getUser(token) {
     })
 }
 
-export function getGames(token) {
-    debug('request Token', token)
+export function getGames(token, gameId) {
+    debug('gameId', gameId)
+    let query = gameId ? '?game=' + gameId : ''
     return request({
-        url:'/api/games',
+        url:'/api/games'+query,
         token
     })
 }

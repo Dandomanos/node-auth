@@ -5,8 +5,8 @@ Vue.use(Vuex)
 
 import auth from './authModule'
 import users from './usersDataModule'
-// import admin from './adminModule'
-import game from './gameModule'
+import match from './matchModule'
+import games from './gamesModule'
 
 export default new Vuex.Store({
     state: {
@@ -21,7 +21,7 @@ export default new Vuex.Store({
     modules: {
         auth,
         users,
-        // admin,
-        game
+        match,
+        games
     }
 })

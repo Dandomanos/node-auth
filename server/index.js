@@ -3,12 +3,15 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     logger = require('morgan'),
     mongoose = require('mongoose')
-    config = require('./app/config/main'),
+    config = require('./app/config/main')
 
 require('./app/bootstrap')(app)
 
 // Start the server
 const server = app.listen(config.port)
+const io = require('socket.io').listen(server)
+global.io = io
+
 console.log('Server running on port ' + config.port + '.')
 
 

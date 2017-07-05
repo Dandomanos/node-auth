@@ -13,6 +13,21 @@ let players = {
 // GET GAMES
 //========================================
 exports.getGames = function*(req) {
+
+    let query = getQuery(req.url)
+    if(query.game) {
+        let game = yield Game.findOne( { _id: query.game} )
+        if(!game)
+            throw new res.exception.UnknowGame()
+
+        let gamePopulated = yield User.populate(game, {path: "players"})
+        if(!gamePopulated)
+            throw new res.exception.CantPopulateUsers()
+
+        return { game: game }
+    }
+        
+
     let games = yield Game.find( {} )
     if(!games)
         throw new res.exception.NoGamesCreated()
@@ -30,7 +45,7 @@ exports.getGames = function*(req) {
 // CREATE NEW GAME
 //========================================
 exports.createGame = function*(req, res) {
-
+    
     let type = req.body.type
     console.log('type of game', type)
     
@@ -55,6 +70,8 @@ exports.createGame = function*(req, res) {
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
         throw new res.exception.CantPopulateUsers()
+    
+    global.io.emit('updated', { games: games })
 
     return {
             message:'game created',
@@ -78,7 +95,8 @@ exports.deleteGame = function*(req, res) {
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
         throw new res.exception.CantPopulateUsers()
-
+    
+    global.io.emit('updated', { games: games })
     return {
         message: gameId + ' Deleted',
         games:games
@@ -115,8 +133,6 @@ exports.setPlayer = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
- 
-
     let games = yield Game.find( {} )
     if(!games)
         throw new res.exception.NoGamesCreated()
@@ -124,12 +140,26 @@ exports.setPlayer = function*(req, res) {
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
         throw new res.exception.CantPopulateUsers()
+    
+    global.io.emit('updated', { games: games })
+
+    let gamePopulated = yield User.populate(game, {path: "players"})
+    if(!gamePopulated)
+        throw new res.exception.CantPopulateUsers()
+    global.io.emit('gameupdated', { game: game })
 
     return {
             message:'user enter the game',
             game:game,
             games: games
     }
+}
+
+function getQuery(path) {
+    let url = require('url')
+    let url_parts = url.parse(path, true)
+    let query = url_parts.query
+    return query
 }
 
 

@@ -86,7 +86,7 @@ export default {
         },
         ...mapState({
             users: state => state.users.users,
-            games: state => state.game.games
+            games: state => state.games.games
         }) 
     },
     methods: {
@@ -97,9 +97,9 @@ export default {
         },
         ...mapActions({
             getUsers:'users/GET_USERS',
-            newGame:'game/CREATE_GAME',
-            getGames:'game/GET_GAMES',
-            deleteGame: 'game/DELETE_GAME'
+            newGame:'games/CREATE_GAME',
+            getGames:'games/GET_GAMES',
+            deleteGame: 'games/DELETE_GAME'
         })
     },
     mounted(){

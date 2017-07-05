@@ -18,8 +18,10 @@
     "axios": "^0.16.1",
     "bulma": "^0.4.2",
     "debug": "^2.6.6",
+    "socket.io-client": "^2.0.3",
     "vue": "^2.2.6",
     "vue-router": "^2.3.1",
+    "vue-socket.io": "^2.1.1-a",
     "vuex": "^2.3.1",
     "vuex-router-sync": "^4.1.2"
   },

@@ -87,23 +87,24 @@ export default {
         },
         ...mapActions({
             sendEmail:'auth/SEND_CONFIRMATION_EMAIL',
-            getGames:'game/GET_GAMES',
-            setPlayer:'game/SET_PLAYER'
+            getGames:'games/GET_GAMES',
+            setPlayer:'games/SET_PLAYER'
         }),
-        enterGame(gameId, position) {
+        async enterGame(gameId, position) {
             let data = {
                 gameId:gameId,
                 position:position
             }
             debug('gameId',gameId)
-            this.setPlayer(data) 
+            this.setPlayer(data)
+            await this.$router.replace({name:'Room', params: {gameId:gameId}}) 
         }
 
     },
     computed: {
         ...mapState({
             user: state => state.auth.user,
-            games: state => state.game.games
+            games: state => state.games.games
         }),
     },
     mounted() {
