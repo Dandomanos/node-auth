@@ -146,12 +146,52 @@ exports.setPlayer = function*(req, res) {
     let gamePopulated = yield User.populate(game, {path: "players"})
     if(!gamePopulated)
         throw new res.exception.CantPopulateUsers()
+
+    //check if game should start
+    if(game.state===0 && gameFull(game.players)) {
+        game.state=1
+        game.desk = new Desk()
+        console.log('Starting game, creating desk => ',game.desk)
+        game.markModified('desk')
+        let gameSaved = yield game.save()
+        if(!gameSaved)
+            throw new res.exception.ErrorUpdating()
+
+    }
+
     global.io.emit('gameupdated', { game: game })
 
     return {
             message:'user enter the game',
             game:game,
             games: games
+    }
+}
+
+//AUXILIAR FUNCTIONS
+
+function gameFull(players) {
+    return players ? players.filter( item => item.role === 'Phantom' ).length <= 0 : false
+}
+
+class Desk {
+    constructor(){
+        this.types = ['Oros','Copas', 'Espadas', 'Bastos']
+        this.numbers = [1,2,3,4,5,6,7,10,11,12]
+        return this.createDesk()
+    }
+    createCard(number, type) {
+        return {
+            'number':number,
+            'type':type
+        }
+    }
+    createType(type) {
+        return this.numbers.map((number)=> this.createCard(number, type))
+    }
+    createDesk() {
+        console.log('types', this.types)
+        return this.types.map((type)=>this.createType(type)).reduce((prev, cur) => prev.concat(cur), []).sort(() => (Math.random() - 0.5))
     }
 }
 

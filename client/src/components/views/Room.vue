@@ -20,7 +20,11 @@
                         {{player.username}}
                     </template>
                 </div>
-                <div class="celm-gameTable image is-square">
+                <div class="celm-gameTable">
+                    <div class="cards" v-if="game.desk">
+                     <!-- {{game.desk}} -->
+                    <card v-for="card in game.desk" :type="card.type" :number="card.number" :key="card.number+card.type"></card>
+                    </div>
                 </div>
                 <div class="celm-gamePlayer">
                     <img src="../../../static/game/user.svg" alt="">
@@ -38,6 +42,7 @@
 
 <script>
 import {mapActions,mapState} from 'vuex'
+import Card from '../commons/Card'
 export default {
     name: 'Room',
     data () {
@@ -50,7 +55,7 @@ export default {
         this.getGame({gameId:this.gameId})
     },
     components: {
-        
+        Card
     },
     methods: {
         ...mapActions({
