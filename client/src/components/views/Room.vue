@@ -21,9 +21,45 @@
                     </template>
                 </div>
                 <div class="celm-gameTable">
-                    <div class="cards" v-if="game.desk">
-                     <!-- {{game.desk}} -->
-                    <card v-for="card in game.desk" :type="card.type" :number="card.number" :key="card.number+card.type"></card>
+                    <div
+                        class="cards player-cards"
+                        v-if="game.playersCards && !areYours(player.id)"
+                        v-for="(player, index) in game.playersCards"
+                    >
+                        <h2>{{getUsername(player.id)}} Cards</h2>
+                        <card
+                            v-for="card in player.cards"
+                            :type="card.type"
+                            :number="card.number"
+                            :key="card.number+card.type"
+                            :isHidden="true"
+                            :length="player.cards.length"
+                        ></card>
+                    </div>
+                    <div class="cards desk-cards" v-if="game.desk">
+                     <h2>Desk Cards</h2>
+                        <card
+                            v-for="card in game.desk"
+                            :type="card.type"
+                            :number="card.number"
+                            :key="card.number+card.type"
+                            :isHidden="true"
+                            :length="game.desk.length"
+                        ></card>
+                    </div>
+                    <div
+                        class="cards player-cards"
+                        v-if="game.playersCards && areYours(player.id)"
+                        v-for="(player, index) in game.playersCards"
+                    >
+                        <h2>{{getUsername(player.id)}} Cards</h2>
+                        <card
+                            v-for="card in player.cards"
+                            :type="card.type"
+                            :number="card.number"
+                            :key="card.number+card.type"
+                            :length="player.cards.length"
+                        ></card>
                     </div>
                 </div>
                 <div class="celm-gamePlayer">
@@ -43,6 +79,7 @@
 <script>
 import {mapActions,mapState} from 'vuex'
 import Card from '../commons/Card'
+const debug = require('debug')('GAME ROOM => ')
 export default {
     name: 'Room',
     data () {
@@ -60,7 +97,15 @@ export default {
     methods: {
         ...mapActions({
             getGame: 'match/GET_GAME'
-        })
+        }),
+        getUsername(id) {
+            let user = this.game.players.filter(item => item._id===id)[0]
+            debug('user', user)
+            return user.username
+        },
+        areYours(id) {
+            return id === this.user._id
+        }
     },
     computed: {
         ...mapState({
@@ -73,8 +118,8 @@ export default {
 <style lang="scss">
 @import '../../assets/scss/_const.scss';
 .celm-room--container {
-    width:80%;
-    max-width:25rem;
+    width:100%;
+    max-width:35rem;
     margin:0 auto;
     .celm-gamePlayer {
         max-width:12rem;
@@ -90,12 +135,18 @@ export default {
         }
     }
     .celm-gameTable {
-        // width:100%;
-        // height:100%;
-        // max-width:40rem;
-        // max-height:40rem;
-        // margin:0 auto;
         border:$input-border;
+        .desk-cards {
+            .cardContainer {
+                width: 1px;
+                margin: 0;
+                padding: 0;
+                &:last-child {
+                    width:$card-width;
+                    max-width:$card-width!important;
+                }
+            }
+        }
     }
 }
 </style>

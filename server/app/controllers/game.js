@@ -6,7 +6,11 @@ const expressDeliver = require('express-deliver')
 const mongoose = require('mongoose')
 
 let players = {
-    0: 2
+    0: 2,
+}
+
+let cardsByPlayer = {
+    0: 5,
 }
 
 //========================================
@@ -51,7 +55,8 @@ exports.createGame = function*(req, res) {
     
     let game = new Game({
         type:type,
-        players: new Array(players[type])
+        players: new Array(players[type]),
+        cardsByPlayer: cardsByPlayer[type]
     })
 
     //create phantoms user
@@ -150,8 +155,10 @@ exports.setPlayer = function*(req, res) {
     //check if game should start
     if(game.state===0 && gameFull(game.players)) {
         game.state=1
+        //create desk and deal cards
         game.desk = new Desk()
-        console.log('Starting game, creating desk => ',game.desk)
+
+        game = dealCards(game, 4)
         game.markModified('desk')
         let gameSaved = yield game.save()
         if(!gameSaved)
@@ -200,6 +207,26 @@ function getQuery(path) {
     let url_parts = url.parse(path, true)
     let query = url_parts.query
     return query
+}
+
+function dealCards(game, total) {
+    if(game && game.desk && game.players)
+        console.log('ready to deal')
+        
+    game.playersCards = game.players.map( (item, index) =>  createPlayerCards(item._id, takeCards(game.desk, index*total, total)))
+    game.desk = game.desk.filter( (item,index)=> index>game.playersCards.length*total)
+    return game
+}
+
+function takeCards(desk, init, total) {
+    return desk.filter( (item, index) => index >= init && index < total + init )
+}
+
+function createPlayerCards(uid, cards) {
+    return {
+        id: uid,
+        cards:cards
+    }
 }
 
 
