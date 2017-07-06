@@ -1,16 +1,17 @@
 <template>
-    <div class="cardContainer" :style="containerStyle">
+    <button class="button cardContainer" :style="containerStyle" @click="submit()">
         <div class="card">
             <div class="bg-card" :style="cardStyle"></div>  
             <span>{{number}} de {{type}}</span>
         </div>
-    </div>
+    </button>
 </template>
 
 <script>
+// const debug = require('debug')('card')
 export default {
     name: 'Card',
-    props:['type', 'number','isHidden','length'],
+    props:['type', 'number','isHidden','length','action'],
     data () {
         return {
             // isHidden:false,
@@ -32,7 +33,9 @@ export default {
         }
     },
     methods: {
-        
+        submit() {
+            this.action({card:{type:this.type, number:this.number}})   
+        }
     }
 }
 </script>
@@ -42,6 +45,11 @@ export default {
     width:$card-width;
     padding:$card-air;
     display:inline-block;
+    border:none;
+    height: auto;
+    &[disabled] {
+        opacity:1;
+    }
     &.isHidden {
         .card {
             //add background for hide card

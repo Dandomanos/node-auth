@@ -102,6 +102,11 @@ const exceptionPool = new ExceptionPool({
         code:2018,
         message:'Fail deleting a game' ,
         statusCode:401
+    },
+    YouCantPlayNow: {
+        code:2019,
+        message:'You cant play now' ,
+        statusCode:401
     }
 })
 

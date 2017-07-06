@@ -197,6 +197,19 @@ export function setPlayer(gameId,position,token) {
     })
 }
 
+export function pushCard(token, gameId, card) {
+    debug('gameId', gameId)
+    return request({
+        url:'/api/pushCard',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            card
+        }
+    })
+}
+
 /* ADMIN END POINTS */
 
 export function getUsers(token) {

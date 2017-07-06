@@ -109,15 +109,68 @@ exports.deleteGame = function*(req, res) {
 }
 
 //========================================
+// PUSH CARD
+//========================================
+exports.pushCard = function*(req, res) {
+    let gameId = req.body.gameId
+    let card = req.body.card
+    let userId = req.user._id
+
+    let game = yield Game.findOne({ _id: gameId })
+    if(!game)
+        throw new res.exception.UnknowGame()
+
+    let popGame = yield User.populate(game, {path: "players"})
+    if(!popGame)
+        throw new res.exception.CantPopulateUsers()
+
+    //check if this player can push a card
+    let activePlayerId = game.players[game.activePlayer]._id
+    if(userId.toString() === activePlayerId.toString()) {
+        game.playersCards[game.activePlayer].pushedCard = card
+
+        game.playersCards[game.activePlayer].cards = game.playersCards[game.activePlayer].cards
+            .filter(item => !compareCard(item, card))
+        
+        //check if round is finish
+        let all = allPushed(game.playersCards)
+        if(all) {
+            console.log('round finished')
+            //stop the game interactions
+            game.activePlayer=-1
+            setTimeout(() => {
+                console.log('new round')
+                //check who win the round
+                let winner = checkWinner(game.playersCards)
+                console.log('winner position', winner)
+            }, 5000)
+        } else {
+            game.activePlayer = nextPlayer(game.activePlayer,game.playersCards)
+        }
+
+    } else {
+        throw new res.exception.YouCantPlayNow()
+    }
+    game.markModified('playersCards')
+    let saved = yield game.save()
+    if(!saved)
+        throw new res.exception.ErrorUpdating()
+
+    global.io.emit('gameupdated', { game: game })
+
+    return {
+        // gameId:gameId,
+        // card:card,
+        // userId: userId
+    }
+}
+//========================================
 // SET PLAYER IN A GAME
 //========================================
 exports.setPlayer = function*(req, res) {
     let gameId = req.body.gameId
     let position = req.body.position
     let userId = req.user._id
-    console.log('gameId', gameId)
-    console.log('position', position)
-    console.log('userId', userId)
 
     //check if the place is free
     let game = yield Game.findOne({ _id: gameId })
@@ -157,8 +210,8 @@ exports.setPlayer = function*(req, res) {
         game.state=1
         //create desk and deal cards
         game.desk = new Desk()
-
         game = dealCards(game, 4)
+        game.activePlayer = 0
         game.markModified('desk')
         let gameSaved = yield game.save()
         if(!gameSaved)
@@ -228,5 +281,24 @@ function createPlayerCards(uid, cards) {
         cards:cards
     }
 }
+
+function allPushed(players) {
+    return players.filter(item => item.pushedCard.type==='Empty').length<1
+}
+
+function nextPlayer(active,players) {
+    return active < players.length-1 ? ++active : 0
+}
+
+function compareCard(item, card) {
+    return item.number === card.number && item.type === card.type
+}
+
+function checkWinner(players) {
+    let values = players.map((item)=> item.pushedCard.number)
+    return values.indexOf(Math.max.apply(null, values))
+}
+
+
 
 

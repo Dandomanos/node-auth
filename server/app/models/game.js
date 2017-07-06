@@ -48,11 +48,40 @@ const Game0Schema = new Schema({
                 enum: [1,2,3,4,5,6,7,10,11,12],
                 default:1
             }
-        }]
+        }],
+        pushedCard: {
+            type: {
+                type:String,
+                enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Empty'],
+                default: 'Empty'
+            },
+            number: {
+                type: Number,
+                enum: [0,1,2,3,4,5,6,7,10,11,12],
+                default:0
+            },
+            default:{}
+        },
+        gotCards: [{
+            type: {
+                type:String,
+                enum: ['Oros','Copas', 'Espadas', 'Bastos'],
+                default: 'Oros'
+            },
+            number: {
+                type: Number,
+                enum: [1,2,3,4,5,6,7,10,11,12],
+                default:1
+            }
+        }],
     }],
     cardsByPlayer: {
         type: Number,
         default:10
+    },
+    activePlayer:{
+        type: Number,
+        default: -1
     }
 })
 

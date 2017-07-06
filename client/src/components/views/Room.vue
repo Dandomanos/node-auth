@@ -1,8 +1,13 @@
 <template>
     <div class="celm-room--container">
         <div class="celm-room--gameHeader">
-            <h2>Game Room</h2>
-            <h3>gameId: {{gameId}}</h3>
+            <div class="celm-dev-toolbar">
+                <h2>Game Room</h2>
+                <h3>gameId: {{gameId}}</h3>
+                <div v-if="game">
+                    activePlayer: {{game.activePlayer}}
+                </div>
+            </div>
         </div>
         <template v-if="game && game.players && user">
             <div class="celm-room--gameContent" >
@@ -10,7 +15,7 @@
                     class="celm-gamePlayer"
                     v-for="(player, index) in game.players"
                     v-if="player._id !== user._id"
-                    :class="{'is-phantom':player.role==='Phantom'}"
+                    :class="{'is-phantom':player.role==='Phantom', 'is-active':player._id===activePlayerId}"
                 >
                     <img src="../../../static/game/user.svg" alt="">
                     <template v-if="player.role==='Phantom'">
@@ -34,7 +39,15 @@
                             :key="card.number+card.type"
                             :isHidden="true"
                             :length="player.cards.length"
+                            :disabled="true"
                         ></card>
+                        <card
+                            :type="player.pushedCard.type"
+                            :number="player.pushedCard.number"
+                            class="celm-pushedCard"
+                            :disabled="true"
+                        ></card>
+
                     </div>
                     <div class="cards desk-cards" v-if="game.desk">
                      <h2>Desk Cards</h2>
@@ -54,15 +67,23 @@
                     >
                         <h2>{{getUsername(player.id)}} Cards</h2>
                         <card
+                            :type="player.pushedCard.type"
+                            :number="player.pushedCard.number"
+                            class="celm-pushedCard"
+                            :disabled="true"
+                        ></card>
+                        <card
                             v-for="card in player.cards"
                             :type="card.type"
                             :number="card.number"
                             :key="card.number+card.type"
                             :length="player.cards.length"
+                            :action="pushCard"
+                            :disabled="!isYourTurn || loading"
                         ></card>
                     </div>
                 </div>
-                <div class="celm-gamePlayer">
+                <div class="celm-gamePlayer" :class="{'is-active':user._id===activePlayerId}">
                     <img src="../../../static/game/user.svg" alt="">
                     {{user.username}}
                 </div>
@@ -96,7 +117,8 @@ export default {
     },
     methods: {
         ...mapActions({
-            getGame: 'match/GET_GAME'
+            getGame: 'match/GET_GAME',
+            pushCard: 'match/PUSH_CARD'
         }),
         getUsername(id) {
             let user = this.game.players.filter(item => item._id===id)[0]
@@ -105,13 +127,23 @@ export default {
         },
         areYours(id) {
             return id === this.user._id
-        }
+        },
+        // pushCard(card) {
+        //     debug('card to push', card)
+        // }
     },
     computed: {
         ...mapState({
             game: state => state.match.game,
+            loading: state => state.match.fetchStatus === 'fetching',
             user: state => state.auth.user
-        })
+        }),
+        activePlayerId() {
+            return this.game && this.game.players && this.game.players[this.game.activePlayer] && this.game.players[this.game.activePlayer]._id
+        },
+        isYourTurn() {
+            return this.activePlayerId === this.user._id
+        }
     }
 }
 </script>
@@ -121,9 +153,17 @@ export default {
     width:100%;
     max-width:35rem;
     margin:0 auto;
+    .celm-dev-toolbar {
+        font-size:0.9rem;
+    }
     .celm-gamePlayer {
         max-width:12rem;
         margin:0 auto;
+        &.is-active {
+            background-color:lighten($primary-color, 40);
+            border:$input-border;
+            border-color:darken($primary-color, 10);
+        }
         img {
             max-width:10rem;
             max-height:10rem;
@@ -144,6 +184,24 @@ export default {
                 &:last-child {
                     width:$card-width;
                     max-width:$card-width!important;
+                }
+            }
+        }
+        .player-cards {
+            margin:0.5rem;
+        }
+        .celm-pushedCard {
+            display:block;
+            text-align:center;
+            width:100%;
+            padding: 0;
+            background-color: transparent;
+            margin:0 auto;
+            .card {
+                width:$card-width;
+                margin:0.5rem auto;
+                span {
+                    display:none;
                 }
             }
         }
