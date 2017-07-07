@@ -25,8 +25,7 @@ export default {
             return (100/this.length) + '%'
         },
         cardStyle() {
-            return {backgroundImage: this.url}
-            // return {backgroundColor: 'red'}
+            return this.type !== 'Empty' ? {backgroundImage: this.url} : {}
         },
         containerStyle() {
             return {maxWidth:this.maxWidth}
