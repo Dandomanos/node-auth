@@ -12,7 +12,7 @@ let players = {
 }
 
 let cardsByPlayer = {
-    0: 5,
+    0: 20,
 }
 
 let newState
@@ -223,7 +223,8 @@ exports.setPlayer = function*(req, res) {
         game.state=1
         //create desk and deal cards
         game.desk = new Desk()
-        game = dealCards(game, 4)
+        console.log('game.type', game.type)
+        game = dealCards(game, cardsByPlayer[game.type])
         game.activePlayer = 0
         game.markModified('desk')
         let gameSaved = yield game.save()
@@ -276,9 +277,9 @@ function getQuery(path) {
 }
 
 function dealCards(game, total) {
-    if(game && game.desk && game.players)
-        console.log('ready to deal')
-        
+    // if(game && game.desk && game.players)
+    //     console.log('ready to deal')
+    game.triumphCard = game.desk[game.desk.length-1]    
     game.playersCards = game.players.map( (item, index) =>  createPlayerCards(item._id, takeCards(game.desk, index*total, total)))
     game.desk = game.desk.filter( (item,index)=> index>game.playersCards.length*total)
     return game

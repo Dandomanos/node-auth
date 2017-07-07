@@ -35,6 +35,19 @@ const Game0Schema = new Schema({
             default:1
         }
     }],
+    triumphCard:{
+        type: {
+            type:String,
+            enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Empty'],
+            default: 'Empty'
+        },
+        number: {
+            type: Number,
+            enum: [0,1,2,3,4,5,6,7,10,11,12],
+            default:0
+        },
+        default:{}
+    },
     playersCards:[{
         id: { type: String},
         cards: [{
