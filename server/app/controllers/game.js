@@ -139,6 +139,14 @@ exports.pushCard = function*(req, res) {
     } else {
         throw new res.exception.YouCantPlayNow()
     }
+
+    //check if it is the first card on the round
+    let mandatory = checkMandatory(game.playersCards)
+    if(mandatory) {
+        console.log('mandatoryCard')
+        game.mandatoryCard = card
+    }
+    // game.markModified('mandatoryCard')
     game.markModified('playersCards')
     let all = allPushed(game.playersCards)
     //check if round is finish to set next active
@@ -159,6 +167,7 @@ exports.pushCard = function*(req, res) {
         console.log('round finished')
         //stop the game interactions
         game.activePlayer=-1
+        game.mandatoryCard = {}
         game = finishRound(game)
         game.markModified('playersCards')
         let saved = yield game.save()
@@ -298,6 +307,10 @@ function createPlayerCards(uid, cards) {
 
 function allPushed(players) {
     return players.filter(item => item.pushedCard.type==='Empty').length<1
+}
+
+function checkMandatory(players) {
+    return players.filter(item => item.pushedCard.type==='Empty').length==players.length-1
 }
 
 function nextPlayer(active,players) {
