@@ -32,22 +32,34 @@
                         v-for="(player, index) in game.playersCards"
                     >
                         <h2>{{getUsername(player.id)}} Cards</h2>
-                        <card
-                            v-for="card in player.cards"
-                            :type="card.type"
-                            :number="card.number"
-                            :key="card.number+card.type"
-                            :isHidden="true"
-                            :length="player.cards.length"
-                            :disabled="true"
-                        ></card>
-                        <card
-                            :type="player.pushedCard.type"
-                            :number="player.pushedCard.number"
-                            class="celm-pushedCard"
-                            :disabled="true"
-                        ></card>
-
+                        <div class="player-cards">
+                            <card
+                                v-for="card in player.cards"
+                                :type="card.type"
+                                :number="card.number"
+                                :key="card.number+card.type"
+                                :isHidden="true"
+                                :length="player.cards.length"
+                                :disabled="true"
+                            ></card>
+                        </div>
+                        <div class="game-cards vs-cards">
+                            <div class="pushed-cards">
+                                <card
+                                    :type="player.pushedCard.type"
+                                    :number="player.pushedCard.number"
+                                    class="celm-pushedCard"
+                                    :disabled="true"
+                                ></card>
+                            </div>
+                            <div class="collected-cards">
+                                <card
+                                    v-for="card in player.collectedCards"
+                                    :isHidden="true"
+                                    :disabled="true"
+                                ></card>
+                            </div>
+                        </div>
                     </div>
                     <div class="cards desk-cards" v-if="game.desk">
                      <h2>Desk Cards</h2>
@@ -66,21 +78,35 @@
                         v-for="(player, index) in game.playersCards"
                     >
                         <h2>{{getUsername(player.id)}} Cards</h2>
-                        <card
-                            :type="player.pushedCard.type"
-                            :number="player.pushedCard.number"
-                            class="celm-pushedCard"
-                            :disabled="true"
-                        ></card>
-                        <card
-                            v-for="card in player.cards"
-                            :type="card.type"
-                            :number="card.number"
-                            :key="card.number+card.type"
-                            :length="player.cards.length"
-                            :action="pushCard"
-                            :disabled="!isYourTurn || loading"
-                        ></card>
+
+                        <div class="game-cards team-cards">
+                            <div class="pushed-cards">
+                                <card
+                                    :type="player.pushedCard.type"
+                                    :number="player.pushedCard.number"
+                                    class="celm-pushedCard"
+                                    :disabled="true"
+                                ></card>
+                            </div>
+                            <div class="collected-cards">
+                                <card
+                                    v-for="card in player.collectedCards"
+                                    :isHidden="true"
+                                    :disabled="true"
+                                ></card>
+                            </div>
+                        </div>
+                        <div class="player-cards">
+                            <card
+                                v-for="card in player.cards"
+                                :type="card.type"
+                                :number="card.number"
+                                :key="card.number+card.type"
+                                :length="player.cards.length"
+                                :action="pushCard"
+                                :disabled="!isYourTurn || loading"
+                            ></card>
+                        </div>
                     </div>
                 </div>
                 <div class="celm-gamePlayer" :class="{'is-active':user._id===activePlayerId}">
@@ -176,7 +202,7 @@ export default {
     }
     .celm-gameTable {
         border:$input-border;
-        .desk-cards {
+        .desk-cards, .collected-cards {
             .cardContainer {
                 width: 1px;
                 margin: 0;
@@ -184,6 +210,23 @@ export default {
                 &:last-child {
                     width:$card-width;
                     max-width:$card-width!important;
+                }
+            }
+        }
+        .game-cards {
+            position:relative;
+            .collected-cards {
+                position:absolute;
+                top:0;
+            }
+            &.team-cards {
+                .collected-cards {
+                    right:0;
+                }
+            }
+            &.vs-cards {
+                .collected-cards {
+                    left:0;
                 }
             }
         }

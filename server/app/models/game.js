@@ -62,7 +62,7 @@ const Game0Schema = new Schema({
             },
             default:{}
         },
-        gotCards: [{
+        collectedCards: [{
             type: {
                 type:String,
                 enum: ['Oros','Copas', 'Espadas', 'Bastos'],

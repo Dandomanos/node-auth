@@ -5,6 +5,8 @@ const config = require('../config/main')
 const expressDeliver = require('express-deliver')
 const mongoose = require('mongoose')
 
+const reactionTime = 3000
+
 let players = {
     0: 2,
 }
@@ -12,6 +14,8 @@ let players = {
 let cardsByPlayer = {
     0: 5,
 }
+
+let newState
 
 //========================================
 // GET GAMES
@@ -131,32 +135,41 @@ exports.pushCard = function*(req, res) {
 
         game.playersCards[game.activePlayer].cards = game.playersCards[game.activePlayer].cards
             .filter(item => !compareCard(item, card))
-        
-        //check if round is finish
-        let all = allPushed(game.playersCards)
-        if(all) {
-            console.log('round finished')
-            //stop the game interactions
-            game.activePlayer=-1
-            setTimeout(() => {
-                console.log('new round')
-                //check who win the round
-                let winner = checkWinner(game.playersCards)
-                console.log('winner position', winner)
-            }, 5000)
-        } else {
-            game.activePlayer = nextPlayer(game.activePlayer,game.playersCards)
-        }
 
     } else {
         throw new res.exception.YouCantPlayNow()
     }
     game.markModified('playersCards')
+    let all = allPushed(game.playersCards)
+    //check if round is finish to set next active
+    if(!all) {
+        game.activePlayer = nextPlayer(game.activePlayer,game.playersCards)
+    } else {
+        game.activePlayer=-1
+    }
+
     let saved = yield game.save()
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
     global.io.emit('gameupdated', { game: game })
+
+    //check if round is finish to collect cards and emit a new update event
+    if(all) {
+        console.log('round finished')
+        //stop the game interactions
+        game.activePlayer=-1
+        game = finishRound(game)
+        game.markModified('playersCards')
+        let saved = yield game.save()
+        if(!saved)
+            throw new res.exception.ErrorUpdating()
+
+        setTimeout(()=>{
+            global.io.emit('gameupdated', { game: game })
+        }, reactionTime)
+
+    }
 
     return {
         // gameId:gameId,
@@ -297,6 +310,29 @@ function compareCard(item, card) {
 function checkWinner(players) {
     let values = players.map((item)=> item.pushedCard.number)
     return values.indexOf(Math.max.apply(null, values))
+}
+
+function collectCards(players, winner) {
+    let roundCards = players.map(item => item.pushedCard)
+    console.log('roundCards', roundCards)
+    players[winner].collectedCards = players[winner].collectedCards.concat(roundCards)
+    console.log('collectedCards', players[winner].collectedCards)
+    players = players.map(item => clearPushed(item) )
+    console.log('round finished', players)
+    return players
+}
+function clearPushed(item) {
+    item.pushedCard.type='Empty'
+    return item
+}
+
+function finishRound(game) {
+    console.log('new round')
+    //check who win the round
+    let winner = checkWinner(game.playersCards)
+    game.playersCards = collectCards(game.playersCards, winner)
+    game.activePlayer = winner
+    return game
 }
 
 
