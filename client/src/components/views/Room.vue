@@ -55,6 +55,7 @@
                             <div class="collected-cards">
                                 <card
                                     v-for="card in player.collectedCards"
+                                    :key="card.number+card.type"
                                     :isHidden="true"
                                     :disabled="true"
                                 ></card>
@@ -70,6 +71,15 @@
                             :key="card.number+card.type"
                             :isHidden="true"
                             :length="game.desk.length"
+                            :disabled="true"
+                        ></card>
+                    </div>
+                    <div class="cards triumphCard">
+                        <card
+                            v-if="game.triumphCard"
+                            :type="game.triumphCard.type"
+                            :number="game.triumphCard.number"
+                            :disabled="true"
                         ></card>
                     </div>
                     <div
@@ -91,6 +101,7 @@
                             <div class="collected-cards">
                                 <card
                                     v-for="card in player.collectedCards"
+                                    :key="card.number+card.type"
                                     :isHidden="true"
                                     :disabled="true"
                                 ></card>
@@ -98,7 +109,7 @@
                         </div>
                         <div class="player-cards">
                             <card
-                                v-for="card in player.cards"
+                                v-for="card in orderedCards"
                                 :type="card.type"
                                 :number="card.number"
                                 :key="card.number+card.type"
@@ -131,7 +142,9 @@ export default {
     name: 'Room',
     data () {
         return {
-            gameId:''
+            gameId:'',
+            types : ['Oros','Copas','Espadas','Bastos'],
+            values: [1,3,0]
         }
     },
     mounted(){
@@ -154,9 +167,6 @@ export default {
         areYours(id) {
             return id === this.user._id
         },
-        // pushCard(card) {
-        //     debug('card to push', card)
-        // }
     },
     computed: {
         ...mapState({
@@ -169,6 +179,23 @@ export default {
         },
         isYourTurn() {
             return this.activePlayerId === this.user._id
+        },
+        playerCards() {
+            return this.game && this.game.playersCards && this.game.playersCards.filter(item=>item.id === this.user._id)[0].cards
+        },
+        sortedCards() {
+            let byNumber = this.playerCards.sort((a,b) =>  b.number - a.number )
+            let sorted = new Array()
+            sorted[0] = byNumber.filter(item => item.number === 1)
+            sorted[1] = byNumber.filter(item => item.number === 3)
+            sorted[2] = byNumber.filter(item => item.number !== 3 && item.number !== 1)
+
+            sorted = sorted.reduce((prev, cur) => prev.concat(cur), [])
+            return sorted
+        },
+        orderedCards() {
+            return this.types.map((item) => this.sortedCards.filter(card => card.type === item))
+                .reduce((prev, cur) => prev.concat(cur), [])
         }
     }
 }
