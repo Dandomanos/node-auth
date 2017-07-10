@@ -167,8 +167,8 @@ exports.pushCard = function*(req, res) {
         console.log('round finished')
         //stop the game interactions
         game.activePlayer=-1
-        game.mandatoryCard = {}
         game = finishRound(game)
+        game.mandatoryCard = {}
         game.markModified('playersCards')
         let saved = yield game.save()
         if(!saved)
@@ -321,9 +321,30 @@ function compareCard(item, card) {
     return item.number === card.number && item.type === card.type
 }
 
-function checkWinner(players) {
-    let values = players.map((item)=> item.pushedCard.number)
-    return values.indexOf(Math.max.apply(null, values))
+function checkWinner(players,triumph,mandatory) {
+
+    let winnerCard
+    let pushedCards = players.map((item)=> item.pushedCard)
+    let triumphs = pushedCards.filter(item =>item.type===triumph.type)
+    let sameType = pushedCards.filter(item =>item.type===mandatory.type)
+
+    if(triumphs.length>0)
+        winnerCard = sortCards(triumphs)[0]
+    else
+        winnerCard = sortCards(sameType)[0]
+
+    let position = pushedCards.indexOf(winnerCard)
+    return position
+}
+
+function sortCards(cards) {
+    let byNumber = cards.sort((a,b) =>  b.number - a.number )
+    let sorted = new Array()
+    sorted[0] = byNumber.filter(item => item.number === 1)
+    sorted[1] = byNumber.filter(item => item.number === 3)
+    sorted[2] = byNumber.filter(item => item.number !== 3 && item.number !== 1)
+
+    return sorted.reduce((prev, cur) => prev.concat(cur), [])
 }
 
 function collectCards(players, winner) {
@@ -343,7 +364,7 @@ function clearPushed(item) {
 function finishRound(game) {
     console.log('new round')
     //check who win the round
-    let winner = checkWinner(game.playersCards)
+    let winner = checkWinner(game.playersCards, game.triumphCard, game.mandatoryCard)
     game.playersCards = collectCards(game.playersCards, winner)
     game.activePlayer = winner
     return game
