@@ -12,7 +12,7 @@ let players = {
 }
 
 let cardsByPlayer = {
-    0: 20,
+    0: 5,
 }
 
 let newState
@@ -170,6 +170,7 @@ exports.pushCard = function*(req, res) {
         game = finishRound(game)
         game.mandatoryCard = {}
         game.markModified('playersCards')
+
         let saved = yield game.save()
         if(!saved)
             throw new res.exception.ErrorUpdating()
@@ -177,6 +178,40 @@ exports.pushCard = function*(req, res) {
         setTimeout(()=>{
             global.io.emit('gameupdated', { game: game })
         }, reactionTime)
+
+        //check if game is finished
+        let finished = isFinished(game.playersCards)
+        if(finished) {
+            game.state = 2
+            console.log('finished game')
+            let score = new Array(2)
+            score[0] = game.playersCards[0].collectedCards.map(item=>getValue(item.number))
+                .reduce((prev,cur) => prev + cur, 0)
+            score[1] = game.playersCards[1].collectedCards.map(item=>getValue(item.number))
+                .reduce((prev,cur) => prev + cur, 0)
+
+            game.score.matchs.push(score)
+
+            let maxValue = Math.max(...score)
+            let index = score.indexOf(maxValue)
+            let points = maxValue >= 102 ? 2 : 1
+
+            let newScore = [0,0]          
+            newScore[index] = points
+            game.score.total = game.score.total.map((item, index) => item + newScore[index])
+
+
+            game.markModified('score')
+
+            let saved = yield game.save()
+            if(!saved)
+                throw new res.exception.ErrorUpdating()
+
+            setTimeout(()=>{
+                global.io.emit('gameupdated', { game: game })
+            }, reactionTime*1.5)
+        
+        }
 
     }
 
@@ -248,6 +283,47 @@ exports.setPlayer = function*(req, res) {
             message:'user enter the game',
             game:game,
             games: games
+    }
+}
+
+//========================================
+// SET READY PLAYER IN A GAME
+//========================================
+exports.setReady = function*(req, res) {
+    let gameId = req.body.gameId
+    // let position = req.body.position
+    let userId = req.user._id
+
+    //check if the place is free
+    let game = yield Game.findOne({ _id: gameId })
+    if(!game)
+        throw new res.exception.UnknowGame()
+
+    let popGame = yield User.populate(game, {path: "players"})
+    if(!popGame)
+        throw new res.exception.CantPopulateUsers()
+
+    let playersId = game.players.map(item => item._id)
+    console.log('playersId',playersId)
+    let index = game.players.map(item => item._id.toString()).indexOf(userId.toString())
+    console.log('index', index)
+    game.readyPlayers[index] = 1
+    console.log('game.readyPlayers',game.readyPlayers)
+
+    game.markModified('readyPlayers')
+    let allConfirmed = game.readyPlayers.reduce((prev,cur)=>prev+cur,0) >= game.players.length
+
+    if(allConfirmed)
+        game = nextRound(game)
+
+    let saved = yield game.save()
+    if(!saved)
+        throw new res.exception.ErrorUpdating()
+
+    global.io.emit('gameupdated', { game: game })
+
+    return {
+            
     }
 }
 
@@ -337,6 +413,24 @@ function checkWinner(players,triumph,mandatory) {
     return position
 }
 
+function getValue(number) {
+    switch(number)
+    {
+        case 1:
+            return 11
+        case 3:
+            return 10
+        case 12:
+            return 4
+        case 11:
+            return 3
+        case 10:
+            return 2
+        default:
+            return 0
+    }
+}
+
 function sortCards(cards) {
     let byNumber = cards.sort((a,b) =>  b.number - a.number )
     let sorted = new Array()
@@ -349,11 +443,11 @@ function sortCards(cards) {
 
 function collectCards(players, winner) {
     let roundCards = players.map(item => item.pushedCard)
-    console.log('roundCards', roundCards)
+    // console.log('roundCards', roundCards)
     players[winner].collectedCards = players[winner].collectedCards.concat(roundCards)
-    console.log('collectedCards', players[winner].collectedCards)
+    // console.log('collectedCards', players[winner].collectedCards)
     players = players.map(item => clearPushed(item) )
-    console.log('round finished', players)
+    // console.log('round finished', players)
     return players
 }
 function clearPushed(item) {
@@ -367,6 +461,31 @@ function finishRound(game) {
     let winner = checkWinner(game.playersCards, game.triumphCard, game.mandatoryCard)
     game.playersCards = collectCards(game.playersCards, winner)
     game.activePlayer = winner
+    return game
+}
+
+function isFinished(players) {
+    let cards = players.map(item => item.cards.map(item=>item))
+        .reduce((prev, cur) => prev + cur.length, 0)
+    console.log('cards to finish ',cards)
+    return cards === 0
+}
+
+function nextRound(game) {
+    game.readyPlayers = game.players.map(item=>0)
+    game.desk = new Desk()
+    game = dealCards(game, cardsByPlayer[game.type])
+    
+    game.lastActive = game.lastActive + 1
+    if(game.lastActive>=game.players.length)
+        game.lastActive = 0
+
+    game.activePlayer = game.lastActive
+
+    game.state = 1
+
+    game.markModified('desk')
+    console.log('game.readyPlayers',game.readyPlayers)
     return game
 }
 

@@ -70,13 +70,9 @@ export default {
     border:$card-border;
     overflow:hidden;
     position:relative;
-    // &.isHidden {
-    //     //add background for hide card
-    //     background-color:blue;
-    //     .bg-card {
-    //         display:none;
-    //     }
-    // }
+    span {
+        display:none;
+    }
     .bg-card {
         position:absolute;
         top:0;

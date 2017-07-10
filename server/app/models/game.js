@@ -4,7 +4,7 @@ const mongoose = require('mongoose'),
 //================================
 // Game Schema
 //================================
-// states: 0 => created, 1 => playing, 2=> finished
+// states: 0 => created, 1 => playing, 2=> scoring 3=>finished
 // types: 0 => Carta más alta
 const Game0Schema = new Schema({
     type: {
@@ -17,6 +17,10 @@ const Game0Schema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'User'
         }]
+    },
+    readyPlayers: {
+        type: Array,
+        default:[0,0]
     },
     state: {
         type: Number,
@@ -108,6 +112,19 @@ const Game0Schema = new Schema({
     activePlayer:{
         type: Number,
         default: -1
+    },
+    lastActive:{
+        type: Number,
+        default: 0
+    },
+    score: {
+        total: {
+            type:Array,
+            default:[0,0]
+        },
+        matchs:[{
+
+        }],
     }
 })
 

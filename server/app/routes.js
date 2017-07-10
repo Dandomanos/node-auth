@@ -71,6 +71,9 @@ module.exports = app => {
     // Push Card
     apiRoutes.post('/pushCard', GameController.pushCard)
 
+    // Set Ready
+    apiRoutes.post('/setReady', GameController.setReady)
+
     //=========================
     // Admin Routes
     //=========================

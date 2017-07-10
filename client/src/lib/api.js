@@ -197,6 +197,18 @@ export function setPlayer(gameId,position,token) {
     })
 }
 
+export function setReady(token,gameId) {
+    debug('request Token', token)
+    return request({
+        url:'/api/setReady',
+        method: 'POST',
+        token,
+        data: {
+            gameId
+        }
+    })
+}
+
 export function pushCard(token, gameId, card) {
     debug('gameId', gameId)
     return request({

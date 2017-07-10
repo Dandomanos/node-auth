@@ -25,7 +25,7 @@
                         {{player.username}}
                     </template>
                 </div>
-                <div class="celm-gameTable">
+                <div class="celm-gameTable" v-if="game.state===0 || game.state===1">
                     <div
                         class="cards player-cards"
                         v-if="game.playersCards && !areYours(player.id)"
@@ -121,6 +121,50 @@
                         </div>
                     </div>
                 </div>
+                <div class="celm-score" v-else-if="game.state===2">
+
+                    <div class="total-score--container">
+                        <div class="total-score columns is-mobile is-head">
+                            <div class="player-cards column is-6" v-for="(score, index) in game.score.total">
+                            TEAM {{index}}
+                            </div>
+                        </div>
+                        <div class="total-score columns is-mobile">
+                            <div class="player-cards column is-6" v-for="(score, index) in game.score.total">
+                            {{score}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="player-cards" v-for="(player, index) in game.playersCards">
+                        <div class="columns is-mobile">
+                            <h3 class="column player-score">Team {{index}}</h3>
+                            <div class="cards-container column is-8">
+                                <card
+                                    v-for="card in player.collectedCards"
+                                    :type="card.type"
+                                    :number="card.number"
+                                    :key="card.number+card.type"
+                                    :length="player.collectedCards.length"
+                                    :disabled="true"
+                                ></card>
+                                <card
+                                    v-if="player.collectedCards.length<=0"
+                                    :type="'Empty'"
+                                    :number="0"
+                                    :disabled="true"
+                                ></card>
+                            </div>
+                            <div class="cards-score column">
+                                {{game.score.matchs[0][index]}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="button celm-button" @click="setReady">
+                        Next Round
+                    </button>
+                </div>
                 <div class="celm-gamePlayer" :class="{'is-active':user._id===activePlayerId}">
                     <img src="../../../static/game/user.svg" alt="">
                     {{user.username}}
@@ -158,7 +202,8 @@ export default {
     methods: {
         ...mapActions({
             getGame: 'match/GET_GAME',
-            pushCard: 'match/PUSH_CARD'
+            pushCard: 'match/PUSH_CARD',
+            setReady: 'match/SET_READY'
         }),
         getUsername(id) {
             let user = this.game.players.filter(item => item._id===id)[0]
@@ -320,6 +365,12 @@ export default {
     }
     .celm-gameTable {
         border:$input-border;
+        .desk-cards, .triumphCard {
+            display:inline;
+            button {
+                padding:0;
+            }
+        }
         .desk-cards, .collected-cards {
             .cardContainer {
                 width: 1px;
@@ -365,6 +416,34 @@ export default {
                     display:none;
                 }
             }
+        }
+    }
+    .celm-score {
+        .cards-container {
+            // width:70%;
+        }
+        .total-score--container {
+            margin:1rem auto;
+        }
+        .total-score {
+            margin:0rem auto;
+            .player-cards {
+                border:$input-border;
+            }
+            &.is-head {
+                background-color:$button-bg-color;
+                color:$button-font-color;
+                font-weight:bold;
+            }
+        }
+        .player-score {
+            align-self: center;
+            font-weight:bold;
+        }
+        .cards-score {
+            align-self:center;
+            font-size:1.5rem;
+            color:darken($primary-color, 10);
         }
     }
 }

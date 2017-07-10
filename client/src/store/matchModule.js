@@ -49,14 +49,19 @@ export default {
             commit('FETCH_STARTED')
             try {
                 await api.pushCard(rootState.auth.token, state.game._id, card)
-                
-                // let data = await api.pushCard(rootState.auth.token, state.game._id, card)
-                // debug('game',data.game)
-                // commit('SET_GAME', data.game)
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)
             }
-        }
+        },
+        async SET_READY({commit,rootState,state}) {
+            debug('gameId', state.game._id)
+            commit('FETCH_STARTED')
+            try {
+                await api.setReady(rootState.auth.token, state.game._id)
+            } catch(err) {
+                commit('SET_FETCH_ERROR', err)
+            }
+        },
     },
     getters:{
         game:state=>state.game
