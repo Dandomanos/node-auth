@@ -1,5 +1,5 @@
 <template>
-    <button class="button cardContainer" :style="containerStyle" @click="submit()">
+    <button class="button cardContainer" :style="containerStyle" @click="submit()" :disabled="!isAllowed">
         <div class="card">
             <div class="bg-card" :style="cardStyle"></div>  
             <span>{{number}} de {{type}}</span>
@@ -11,7 +11,7 @@
 // const debug = require('debug')('card')
 export default {
     name: 'Card',
-    props:['type', 'number','isHidden','length','action'],
+    props:['type', 'number','isHidden','length','action','allowed','yourTurn'],
     data () {
         return {
             // isHidden:false,
@@ -29,6 +29,9 @@ export default {
         },
         containerStyle() {
             return {maxWidth:this.maxWidth}
+        },
+        isAllowed() {
+            return this.allowed && this.allowed.length && this.yourTurn && this.allowed.filter( item => item.type === this.type && item.number === this.number).length>0
         }
     },
     methods: {

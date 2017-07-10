@@ -115,7 +115,8 @@
                                 :key="card.number+card.type"
                                 :length="player.cards.length"
                                 :action="pushCard"
-                                :disabled="!isYourTurn || loading"
+                                :allowed="allowedCards"
+                                :yourTurn="isYourTurn"
                             ></card>
                         </div>
                     </div>
@@ -167,35 +168,125 @@ export default {
         areYours(id) {
             return id === this.user._id
         },
-    },
-    computed: {
-        ...mapState({
-            game: state => state.match.game,
-            loading: state => state.match.fetchStatus === 'fetching',
-            user: state => state.auth.user
-        }),
-        activePlayerId() {
-            return this.game && this.game.players && this.game.players[this.game.activePlayer] && this.game.players[this.game.activePlayer]._id
-        },
-        isYourTurn() {
-            return this.activePlayerId === this.user._id
-        },
-        playerCards() {
-            return this.game && this.game.playersCards && this.game.playersCards.filter(item=>item.id === this.user._id)[0].cards
-        },
-        sortedCards() {
-            let byNumber = this.playerCards.sort((a,b) =>  b.number - a.number )
+        sortCards(cards) {
+            let byNumber = cards.sort((a,b) =>  b.number - a.number )
             let sorted = new Array()
             sorted[0] = byNumber.filter(item => item.number === 1)
             sorted[1] = byNumber.filter(item => item.number === 3)
             sorted[2] = byNumber.filter(item => item.number !== 3 && item.number !== 1)
 
-            sorted = sorted.reduce((prev, cur) => prev.concat(cur), [])
-            return sorted
+            return sorted.reduce((prev, cur) => prev.concat(cur), [])
+        },
+        isTop(value) {
+            if(value === 1)
+                return true
+            if(value === 3 && this.winnerCard.number !== 1) 
+                return true
+            if(this.winnerCard.number === 1)
+                return false
+            if(this.winnerCard.number ===3)
+                return false
+            return value > this.winnerCard.number
+        }
+    },
+    computed: {
+        ...mapState({
+            game: state => state.match.game,
+            loading: state => state.match.fetchStatus === 'fetching',
+            user: state => state.auth.user,
+        }),
+        mandatory() {
+            return this.game.mandatoryCard
+        },
+        activePlayerId() {
+            return this.game && this.game.players && this.game.players[this.game.activePlayer] && this.game.players[this.game.activePlayer]._id
+        },
+        isYourTurn() {
+            return this.activePlayerId === this.user._id && !this.loading 
+        },
+        playerCards() {
+            return this.game && this.game.playersCards && this.game.playersCards.filter(item=>item.id === this.user._id)[0].cards
+        },
+        sortedCards() {
+            return this.sortCards(this.playerCards)
         },
         orderedCards() {
             return this.types.map((item) => this.sortedCards.filter(card => card.type === item))
                 .reduce((prev, cur) => prev.concat(cur), [])
+        },
+        pushedCards(){
+            return this.game && this.game.playersCards && this.game.playersCards.map( item => item.pushedCard )
+        },
+        winnerCard() {
+            let triumphs = this.pushedCards.filter( item => item.type === this.game.triumphCard.type)
+            let sameType = this.pushedCards.filter( item => item.type === this.game.mandatoryCard.type)
+            if (triumphs.length>0)
+                return this.sortCards(triumphs)[0]
+            else
+                return this.sortCards(sameType)[0]
+        },
+        sameType() {
+            return this.orderedCards.filter( item => item.type === this.mandatory.type)
+        },
+        arrastre() {
+            return this.mandatory && this.game && this.game.triumphCard && this.mandatory.type === this.game.triumphCard.type
+        },
+        canWin(){
+            return this.sameType && this.sameType.filter(item => this.isTop(item.number))  
+        },
+        triumphs() {
+            return this.orderedCards.filter( item => item.type === this.game.triumphCard.type)
+        },
+        allowedCards() {
+            if(!this.mandatory || this.mandatory.type==='Empty')
+                return this.orderedCards
+
+            //check cards for the same type
+            let sameType = this.orderedCards.filter( item => item.type === this.mandatory.type)
+
+            debug('this.mandatory.type',this.mandatory.type)
+            debug('this.game.triumphCard.type',this.game.triumphCard.type)
+            // check "arrastre"
+            if(this.arrastre) {
+                debug('Arrastre')
+                if(this.sameType.length>0) {
+                    // let canWin = this.sameType.filter(item => this.isTop(item.number))
+                    if(this.canWin.length>0)
+                        return this.canWin.map(item=>item)
+                    else
+                        return this.sameType
+                } else {
+                    return this.orderedCards
+                }
+            }
+
+            if(this.sameType.length>0) {
+                //if winner have same type of mandatory
+                if(this.winnerCard.type === this.mandatory.type) {
+                    let canWin = sameType.filter(item => this.isTop(item.number))
+                    if(canWin.length>0)
+                        return canWin
+                    else
+                        return this.sameType
+                } else {
+                    return this.sameType
+                }       
+            } else {
+                if(this.winnerCard.type === this.game.triumphCard.type) {
+                    debug('someone use a triumph before you')
+                    let canWin = this.triumphs.filter(item => this.isTop(item.number))
+                    if(canWin.length>0)
+                        return canWin
+                    else
+                        return this.orderedCards
+                } else {
+                    if(this.triumphs.length>0)
+                        return this.triumphs
+                    else
+                        return this.orderedCards
+                }
+            }
+
         }
     }
 }
