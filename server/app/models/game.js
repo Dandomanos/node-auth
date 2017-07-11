@@ -104,6 +104,18 @@ const Game0Schema = new Schema({
                 default:1
             }
         }],
+        extraPoints: [{
+            type: {
+                type:String,
+                enum: ['Monte','Oros','Copas', 'Espadas', 'Bastos'],
+                // default: 'Oros'
+            },
+            value: {
+                type: Number,
+                enum: [10,20,40],
+                // default:1
+            }
+        }],
     }],
     cardsByPlayer: {
         type: Number,

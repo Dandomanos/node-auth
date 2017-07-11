@@ -5,14 +5,14 @@ const config = require('../config/main')
 const expressDeliver = require('express-deliver')
 const mongoose = require('mongoose')
 
-const reactionTime = 3000
+const reactionTime = 1500
 
 let players = {
     0: 2,
 }
 
 let cardsByPlayer = {
-    0: 5,
+    0: 20,
 }
 
 let newState
@@ -184,12 +184,25 @@ exports.pushCard = function*(req, res) {
         if(finished) {
             game.state = 2
             console.log('finished game')
-            let score = new Array(2)
-            score[0] = game.playersCards[0].collectedCards.map(item=>getValue(item.number))
+
+            //Add final 10
+            game.playersCards[game.activePlayer].extraPoints.push({value:10, type:'Monte'})
+            let extraPoints = new Array(2)
+            extraPoints[0] = game.playersCards[0].extraPoints.map(item=>item.value)
                 .reduce((prev,cur) => prev + cur, 0)
-            score[1] = game.playersCards[1].collectedCards.map(item=>getValue(item.number))
+            extraPoints[1] = game.playersCards[1].extraPoints.map(item=>item.value)
                 .reduce((prev,cur) => prev + cur, 0)
 
+            console.log('extraPoints',extraPoints)
+
+            let score = new Array(2)
+            score[0] = game.playersCards[0].collectedCards.map(item=>getValue(item.number))
+            score[1] = game.playersCards[1].collectedCards.map(item=>getValue(item.number))
+            console.log('Score',score)
+
+            score[0] = score[0].reduce((prev,cur) => prev + cur, 0) + extraPoints[0]
+            score[1] = score[1].reduce((prev,cur) => prev + cur, 0) + extraPoints[1]
+            console.log('Score',score)
             game.score.matchs.push(score)
 
             let maxValue = Math.max(...score)
@@ -461,6 +474,9 @@ function finishRound(game) {
     let winner = checkWinner(game.playersCards, game.triumphCard, game.mandatoryCard)
     game.playersCards = collectCards(game.playersCards, winner)
     game.activePlayer = winner
+
+    //check Winner extraPoints
+    game.playersCards = checkExtraPoints(game.playersCards, winner, game.triumphCard.type)
     return game
 }
 
@@ -469,6 +485,52 @@ function isFinished(players) {
         .reduce((prev, cur) => prev + cur.length, 0)
     console.log('cards to finish ',cards)
     return cards === 0
+}
+
+function checkExtraPoints(players,position, triumphType) {
+    let cards = players[position].cards.map( item=>item )
+    let types = ['Oros','Copas','Espadas','Bastos']
+    let cardsByType = types.map(item => cards.filter(card => card.type === item))
+    let songs = cardsByType.map(item => item.filter(card => card.number === 12 || card.number === 11))
+    let extraPoints = songs.filter(item => item.length>1)
+    let extraTypes = extraPoints.map(item => item[0].type )
+    console.log('extraTypes',extraTypes)
+    if(extraTypes.length>0) {
+        let toSing =  extraTypes.filter(item => item === triumphType )
+        if(toSing.length) {
+            let itemToPush = {value:40, type:triumphType}
+            let Exist = players[position].extraPoints.map(item => item.type === itemToPush.type).indexOf(true)
+            console.log('Exist', Exist)
+            if(Exist===-1) {
+                players[position].extraPoints.push(itemToPush)
+                console.log('toSing 40', itemToPush)
+                return players
+            } else {
+                console.log('40 already singed')
+                extraTypes = extraTypes.splice(Exist, 1)
+            }
+        }
+
+        while(extraTypes.length>0) {
+
+            let itemToPush = {value:20, type:extraTypes[0]}
+            let Exist = players[position].extraPoints.map(item => item.type === itemToPush.type).indexOf(true)
+            if(Exist===-1) {
+                players[position].extraPoints.push(itemToPush)
+                console.log('toSing 20', itemToPush)
+                break
+            } else {
+                console.log('20 already singed',itemToPush)
+                if(extraTypes.length<=1)
+                    extraTypes = new Array()
+                else
+                    extraTypes.splice(Exist, 1)
+
+            }
+        }
+    }
+
+    return players
 }
 
 function nextRound(game) {

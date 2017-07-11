@@ -52,6 +52,11 @@
                                     :disabled="true"
                                 ></card>
                             </div>
+                            <div class="extraPoints columns is-mobile">
+                                <div class="column" v-for="extra in player.extraPoints">
+                                    {{extra.value}} en {{extra.type}}
+                                </div>
+                            </div>
                             <div class="collected-cards">
                                 <card
                                     v-for="card in player.collectedCards"
@@ -107,6 +112,11 @@
                                 ></card>
                             </div>
                         </div>
+                        <div class="extraPoints columns is-mobile">
+                            <div class="column" v-for="extra in player.extraPoints">
+                                {{extra.value}} en {{extra.type}}
+                            </div>
+                        </div>
                         <div class="player-cards">
                             <card
                                 v-for="card in orderedCards"
@@ -154,16 +164,25 @@
                                     :number="0"
                                     :disabled="true"
                                 ></card>
+                                <div class="extraPoints columns is-mobile">
+                                    <div class="column" v-for="extra in player.extraPoints">
+                                        {{extra.value}} en {{extra.type}}
+                                        <score :score="extra">
+                                        </score>
+                                    </div>
+                                </div>
                             </div>
                             <div class="cards-score column">
-                                {{game.score.matchs[0][index]}}
+                                {{game.score.matchs[game.score.matchs.length-1][index]}}
+                                
                             </div>
                         </div>
                     </div>
 
-                    <button class="button celm-button" @click="setReady">
+                    <button class="button celm-button" @click="nextRound" :disabled="ready">
                         Next Round
                     </button>
+                    <div v-if="ready">Waitting for the others players</div>
                 </div>
                 <div class="celm-gamePlayer" :class="{'is-active':user._id===activePlayerId}">
                     <img src="../../../static/game/user.svg" alt="">
@@ -182,6 +201,7 @@
 <script>
 import {mapActions,mapState} from 'vuex'
 import Card from '../commons/Card'
+import Score from '../commons/Score'
 const debug = require('debug')('GAME ROOM => ')
 export default {
     name: 'Room',
@@ -189,7 +209,8 @@ export default {
         return {
             gameId:'',
             types : ['Oros','Copas','Espadas','Bastos'],
-            values: [1,3,0]
+            values: [1,3,0],
+            ready:false
         }
     },
     mounted(){
@@ -197,7 +218,8 @@ export default {
         this.getGame({gameId:this.gameId})
     },
     components: {
-        Card
+        Card,
+        Score
     },
     methods: {
         ...mapActions({
@@ -232,6 +254,19 @@ export default {
             if(this.winnerCard.number ===3)
                 return false
             return value > this.winnerCard.number
+        },
+        nextRound() {
+            this.ready=true
+            this.setReady()
+        }
+    },
+    watch: {
+        'game.state': function(newVal) {
+            if(newVal===2) {
+                debug('newVal',this.ready)
+                this.ready=false
+                debug('newVal',newVal)
+            }
         }
     },
     computed: {
@@ -340,7 +375,7 @@ export default {
 @import '../../assets/scss/_const.scss';
 .celm-room--container {
     width:100%;
-    max-width:35rem;
+    max-width:70rem;
     margin:0 auto;
     .celm-dev-toolbar {
         font-size:0.9rem;
