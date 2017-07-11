@@ -74,5 +74,10 @@ export default {
 </script>
 <style lang="scss">
 @import '../../assets/scss/_const.scss';
-
+.scoreContainer--container {
+    button.button.celm-button{
+        display:block;
+        margin:2rem auto;
+    }
+}
 </style>
