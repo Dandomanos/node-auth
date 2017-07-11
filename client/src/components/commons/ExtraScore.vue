@@ -7,8 +7,8 @@
             :key="card.number+card.type"
             :length="scoreCards.length"
             :disabled="true"
+            :isHidden="card.type==='Monte'"
         ></card>
-
     </div>
 </template>
 
@@ -16,7 +16,7 @@
 // const debug = require('debug')('scoreCard')
 import Card from '../commons/Card'
 export default {
-    name: 'Score',
+    name: 'ExtraScore',
     props:['score'],
     data () {
         return {

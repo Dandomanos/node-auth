@@ -146,43 +146,20 @@
                         </div>
                     </div>
 
-                    <div class="player-cards" v-for="(player, index) in game.playersCards">
-                        <div class="columns is-mobile">
-                            <h3 class="column player-score">Team {{index}}</h3>
-                            <div class="cards-container column is-8">
-                                <card
-                                    v-for="card in player.collectedCards"
-                                    :type="card.type"
-                                    :number="card.number"
-                                    :key="card.number+card.type"
-                                    :length="player.collectedCards.length"
-                                    :disabled="true"
-                                ></card>
-                                <card
-                                    v-if="player.collectedCards.length<=0"
-                                    :type="'Empty'"
-                                    :number="0"
-                                    :disabled="true"
-                                ></card>
-                                <div class="extraPoints columns is-mobile">
-                                    <div class="column" v-for="extra in player.extraPoints">
-                                        {{extra.value}} en {{extra.type}}
-                                        <score :score="extra">
-                                        </score>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cards-score column">
-                                {{game.score.matchs[game.score.matchs.length-1][index]}}
-                                
-                            </div>
-                        </div>
-                    </div>
+                    <score-container
+                        :players="game.playersCards"
+                        :matchs="game.score.matchs"
+                        :ready="ready"
+                        @change="isReady()"
+                    >
+                    </score-container>
 
+                    <!--
                     <button class="button celm-button" @click="nextRound" :disabled="ready">
                         Next Round
                     </button>
                     <div v-if="ready">Waitting for the others players</div>
+                    -->
                 </div>
                 <div class="celm-gamePlayer" :class="{'is-active':user._id===activePlayerId}">
                     <img src="../../../static/game/user.svg" alt="">
@@ -201,7 +178,8 @@
 <script>
 import {mapActions,mapState} from 'vuex'
 import Card from '../commons/Card'
-import Score from '../commons/Score'
+import ExtraScore from '../commons/ExtraScore'
+import ScoreContainer from '../commons/ScoreContainer'
 const debug = require('debug')('GAME ROOM => ')
 export default {
     name: 'Room',
@@ -219,14 +197,25 @@ export default {
     },
     components: {
         Card,
-        Score
+        ExtraScore,
+        ScoreContainer
     },
+    // events: {
+    //     readyChange: function (val) {
+    //         debug('readyChange', val)
+    //         this.ready=val
+    //     }
+    // },
     methods: {
         ...mapActions({
             getGame: 'match/GET_GAME',
             pushCard: 'match/PUSH_CARD',
             setReady: 'match/SET_READY'
         }),
+        isReady() {
+            debug('chatching event')
+            this.ready=true
+        },
         getUsername(id) {
             let user = this.game.players.filter(item => item._id===id)[0]
             debug('user', user)
@@ -255,10 +244,7 @@ export default {
                 return false
             return value > this.winnerCard.number
         },
-        nextRound() {
-            this.ready=true
-            this.setReady()
-        }
+        
     },
     watch: {
         'game.state': function(newVal) {

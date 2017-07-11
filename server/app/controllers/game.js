@@ -12,7 +12,7 @@ let players = {
 }
 
 let cardsByPlayer = {
-    0: 20,
+    0: 5,
 }
 
 let newState
