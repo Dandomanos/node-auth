@@ -5,6 +5,9 @@ const config = require('../config/main')
 const expressDeliver = require('express-deliver')
 const mongoose = require('mongoose')
 
+const io = require('../socketEvents').get()
+console.log(io)
+
 const reactionTime = 1500
 
 let players = {
@@ -80,7 +83,7 @@ exports.createGame = function*(req, res) {
     if(!populated)
         throw new res.exception.CantPopulateUsers()
     
-    global.io.emit('updated', { games: games })
+    io.emit('updated', { games: games })
 
     return {
             message:'game created',
@@ -105,7 +108,7 @@ exports.deleteGame = function*(req, res) {
     if(!populated)
         throw new res.exception.CantPopulateUsers()
     
-    global.io.emit('updated', { games: games })
+    io.emit('updated', { games: games })
     return {
         message: gameId + ' Deleted',
         games:games
@@ -160,7 +163,7 @@ exports.pushCard = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    global.io.emit('gameupdated', { game: game })
+    io.emit('gameupdated', { game: game })
 
     //check if round is finish to collect cards and emit a new update event
     if(all) {
@@ -176,7 +179,7 @@ exports.pushCard = function*(req, res) {
             throw new res.exception.ErrorUpdating()
 
         setTimeout(()=>{
-            global.io.emit('gameupdated', { game: game })
+            io.emit('gameupdated', { game: game })
         }, reactionTime)
 
         //check if game is finished
@@ -221,7 +224,7 @@ exports.pushCard = function*(req, res) {
                 throw new res.exception.ErrorUpdating()
 
             setTimeout(()=>{
-                global.io.emit('gameupdated', { game: game })
+                io.emit('gameupdated', { game: game })
             }, reactionTime*1.5)
         
         }
@@ -240,6 +243,7 @@ exports.pushCard = function*(req, res) {
 exports.setPlayer = function*(req, res) {
     let gameId = req.body.gameId
     let position = req.body.position
+    let socketId = req.body.socketId
     let userId = req.user._id
 
     //check if the place is free
@@ -255,6 +259,8 @@ exports.setPlayer = function*(req, res) {
         throw new res.exception.Occupied()
 
     game.players[position] = userId
+    game.socketIds[position] = socketId
+    game.markModified('socketIds')
     game.markModified('players')
 
     let saved = yield game.save()
@@ -269,7 +275,7 @@ exports.setPlayer = function*(req, res) {
     if(!populated)
         throw new res.exception.CantPopulateUsers()
     
-    global.io.emit('updated', { games: games })
+    io.emit('updated', { games: games })
 
     let gamePopulated = yield User.populate(game, {path: "players"})
     if(!gamePopulated)
@@ -290,7 +296,7 @@ exports.setPlayer = function*(req, res) {
 
     }
 
-    global.io.emit('gameupdated', { game: game })
+    io.emit('gameupdated', { game: game })
 
     return {
             message:'user enter the game',
@@ -298,6 +304,45 @@ exports.setPlayer = function*(req, res) {
             games: games
     }
 }
+
+
+//========================================
+// SET SOCKETID ON THE GAM
+//========================================
+exports.setSocketId = function*(req, res) {
+    let gameId = req.body.gameId
+    let socketId = req.body.socketId
+    let userId = req.user._id
+
+    //check if the place is free
+    let game = yield Game.findOne({ _id: gameId })
+    if(!game)
+        throw new res.exception.UnknowGame()
+
+    let popGame = yield User.populate(game, {path: "players"})
+    if(!popGame)
+        throw new res.exception.CantPopulateUsers()
+
+    let position = game.players.map(item=>item._id.toString()).indexOf(userId.toString())
+    if(position==-1)
+         throw new res.exception.YouAreNotInTheGame()
+    
+    console.log('position',position)
+    console.log('socketId',socketId)
+    game.socketIds[position] = socketId
+    game.markModified('socketIds')
+    
+    let saved = yield game.save()
+    if(!saved)
+        throw new res.exception.ErrorUpdating()
+
+    io.emit('gameupdated', { game: game })
+
+    return {
+            
+    }
+}
+
 
 //========================================
 // SET READY PLAYER IN A GAME
@@ -333,7 +378,7 @@ exports.setReady = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    global.io.emit('gameupdated', { game: game })
+    io.emit('gameupdated', { game: game })
 
     return {
             

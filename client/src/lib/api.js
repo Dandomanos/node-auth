@@ -184,7 +184,7 @@ export function getGames(token, gameId) {
     })
 }
 
-export function setPlayer(gameId,position,token) {
+export function setPlayer(gameId,position,token,socketId) {
     debug('request Token', token)
     return request({
         url:'/api/setPlayer',
@@ -192,10 +192,24 @@ export function setPlayer(gameId,position,token) {
         token,
         data: {
             gameId,
-            position
+            position,
+            socketId
         }
     })
 }
+export function setSocketId(token,gameId,socketId) {
+    debug('request Token', token)
+    return request({
+        url:'/api/setSocketId',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            socketId
+        }
+    })
+}
+
 
 export function setReady(token,gameId) {
     debug('request Token', token)

@@ -48,7 +48,7 @@ export default {
             debug('gameId', gameId)
             try {
                 debug('token from rootState', rootState.auth.token)
-                let data = await api.setPlayer(gameId,position,rootState.auth.token)
+                let data = await api.setPlayer(gameId,position,rootState.auth.token,rootState.match.socketId)
                 // debug('games',data.games)
                 commit('SET_GAMES', data.games)
             } catch(err){

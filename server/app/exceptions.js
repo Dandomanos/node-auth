@@ -107,6 +107,11 @@ const exceptionPool = new ExceptionPool({
         code:2019,
         message:'You cant play now' ,
         statusCode:401
+    },
+    YouAreNotInTheGame: {
+        code:2020,
+        message:'You are not in the game' ,
+        statusCode:401
     }
 })
 

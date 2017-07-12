@@ -71,6 +71,9 @@ module.exports = app => {
     // Push Card
     apiRoutes.post('/pushCard', GameController.pushCard)
 
+    // Set SocketId
+    apiRoutes.post('/setSocketId', GameController.setSocketId)
+
     // Set Ready
     apiRoutes.post('/setReady', GameController.setReady)
 

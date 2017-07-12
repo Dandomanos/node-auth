@@ -1,30 +1,40 @@
-exports = module.exports = function(io) {  
-  // Set socket.io listeners.
-  io.on('connection', (socket) => {
-    console.log('a user connected')
+let ioClient
+module.exports = {
+  initEvents() {
+    ioClient.on('connection', (socket) => {
+      console.log('a user connected', socket.id)
 
-    socket.on('updated', (games)=>{
+      socket.on('updated', (games) => {
         console.log('games updated')
-        io.sockets.in(games).emit('updated', games)
+        ioClient.sockets.in(games).emit('updated', games)
+      })
+
+      socket.emit('getid', socket.id)
+
+      // // On conversation entry, join broadcast channel
+      // socket.on('enter conversation', (conversation) => {
+      //   socket.join(conversation);
+      //   // console.log('joined ' + conversation);
+      // });
+
+      // socket.on('leave conversation', (conversation) => {
+      //   socket.leave(conversation);
+      //   // console.log('left ' + conversation);
+      // })
+
+      // socket.on('new message', (conversation) => {
+      //   io.sockets.in(conversation).emit('refresh messages', conversation);
+      //   });
+
+      socket.on('disconnect', () => {
+        console.log('user disconnected', socket.id)
+      })
     })
-
-    // // On conversation entry, join broadcast channel
-    // socket.on('enter conversation', (conversation) => {
-    //   socket.join(conversation);
-    //   // console.log('joined ' + conversation);
-    // });
-
-    // socket.on('leave conversation', (conversation) => {
-    //   socket.leave(conversation);
-    //   // console.log('left ' + conversation);
-    // })
-
-    // socket.on('new message', (conversation) => {
-    //   io.sockets.in(conversation).emit('refresh messages', conversation);
-    //   });
-
-    // socket.on('disconnect', () => {
-    //   //console.log('user disconnected');
-    // });
-  });
+  },
+  set(io){
+    ioClient = io
+  },
+  get(){
+    return ioClient
+  }
 }

@@ -18,6 +18,10 @@ const Game0Schema = new Schema({
             ref: 'User'
         }]
     },
+    socketIds: {
+        type:Array,
+        default:['','']
+    },
     readyPlayers: {
         type: Array,
         default:[0,0]

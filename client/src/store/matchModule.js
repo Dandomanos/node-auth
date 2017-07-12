@@ -7,7 +7,8 @@ export default {
         fetchStatus:null,
         fetchError:null,
         game:null,
-        connected:false
+        connected:false,
+        socketId:null
     },
     mutations: {
         FETCH_STARTED(state) {
@@ -29,9 +30,17 @@ export default {
         SOCKET_GAMEUPDATED: (state, game) => {
             debug('GAME updated', game)
             state.game = game.game
+        },
+        SOCKET_GETID: (state, socketId) => {
+            debug('Socket Connected', socketId)
+            state.socketId = socketId
         }
     },
     actions: {
+        SOCKET_GETID: (state, socketId) => {
+            debug('Socket Connected', socketId)
+            state.socketId = socketId
+        },
         async GET_GAME({commit,rootState},{gameId}) {
             debug('gameId', gameId)
             commit('FETCH_STARTED')
@@ -62,6 +71,15 @@ export default {
                 commit('SET_FETCH_ERROR', err)
             }
         },
+        async SET_SOCKET_ID({commit,rootState,state},{socketId}) {
+            commit('FETCH_STARTED')
+            try {
+                await api.setSocketId(rootState.auth.token, state.game._id, socketId)
+                debug('socketId updated')
+            } catch(err) {
+                commit('SET_FETCH_ERROR', err)
+            }
+        }
     },
     getters:{
         game:state=>state.game

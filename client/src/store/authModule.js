@@ -10,7 +10,7 @@ export default {
         token:null,
         user:null
     },
-    mutations: {
+    mutations: {        
         FETCH_STARTED(state) {
             state.fetchStatus = 'fetching'
             state.token = false

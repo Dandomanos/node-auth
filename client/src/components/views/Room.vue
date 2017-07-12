@@ -11,62 +11,28 @@
         </div>
         <template v-if="game && game.players && user">
             <div class="celm-room--gameContent" >
-                <div
-                    class="celm-gamePlayer"
+                <game-player
                     v-for="(player, index) in game.players"
                     v-if="player._id !== user._id"
-                    :class="{'is-phantom':player.role==='Phantom', 'is-active':player._id===activePlayerId}"
+                    :key="player._id"
+                    :player="player"
+                    :index="index"
+                    :activeId="activePlayerId"
                 >
-                    <img src="../../../static/game/user.svg" alt="">
-                    <template v-if="player.role==='Phantom'">
-                        Player {{index+1}}
-                    </template>
-                    <template v-else>
-                        {{player.username}}
-                    </template>
-                </div>
+                </game-player>
+
                 <div class="celm-gameTable" v-if="game.state===0 || game.state===1">
-                    <div
-                        class="cards player-cards"
+
+                    <player-cards
                         v-if="game.playersCards && !areYours(player.id)"
-                        v-for="(player, index) in game.playersCards"
+                        v-for="player in game.playersCards"
+                        :player="player"
+                        :key="player._id"
+                        :username="getUsername(player.id)"
+                        :owner="areYours(player.id)"
                     >
-                        <h2>{{getUsername(player.id)}} Cards</h2>
-                        <div class="player-cards">
-                            <card
-                                v-for="card in player.cards"
-                                :type="card.type"
-                                :number="card.number"
-                                :key="card.number+card.type"
-                                :isHidden="true"
-                                :length="player.cards.length"
-                                :disabled="true"
-                            ></card>
-                        </div>
-                        <div class="game-cards vs-cards">
-                            <div class="pushed-cards">
-                                <card
-                                    :type="player.pushedCard.type"
-                                    :number="player.pushedCard.number"
-                                    class="celm-pushedCard"
-                                    :disabled="true"
-                                ></card>
-                            </div>
-                            <div class="extraPoints columns is-mobile">
-                                <div class="column" v-for="extra in player.extraPoints">
-                                    {{extra.value}} en {{extra.type}}
-                                </div>
-                            </div>
-                            <div class="collected-cards">
-                                <card
-                                    v-for="card in player.collectedCards"
-                                    :key="card.number+card.type"
-                                    :isHidden="true"
-                                    :disabled="true"
-                                ></card>
-                            </div>
-                        </div>
-                    </div>
+                    </player-cards>
+
                     <div class="cards desk-cards" v-if="game.desk">
                      <h2>Desk Cards</h2>
                         <card
@@ -87,6 +53,20 @@
                             :disabled="true"
                         ></card>
                     </div>
+                    
+                    <!--
+                    <player-cards
+                        v-if="game.playersCards && areYours(player.id)"
+                        v-for="player in game.playersCards"
+                        :player="player"
+                        :username="getUsername(player.id)"
+                        :owner="areYours(player.id)"
+                        :allowed="allowedCards"
+                        :yourTurn="isYourTurn"
+                    >
+                    </player-cards>
+                    -->
+                    
                     <div
                         class="cards player-cards"
                         v-if="game.playersCards && areYours(player.id)"
@@ -130,41 +110,25 @@
                             ></card>
                         </div>
                     </div>
+                    
                 </div>
-                <div class="celm-score" v-else-if="game.state===2">
-
-                    <div class="total-score--container">
-                        <div class="total-score columns is-mobile is-head">
-                            <div class="player-cards column is-6" v-for="(score, index) in game.score.total">
-                            TEAM {{index}}
-                            </div>
-                        </div>
-                        <div class="total-score columns is-mobile">
-                            <div class="player-cards column is-6" v-for="(score, index) in game.score.total">
-                            {{score}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <score-container
-                        :players="game.playersCards"
-                        :matchs="game.score.matchs"
-                        :ready="ready"
-                        @change="isReady()"
-                    >
-                    </score-container>
-
-                    <!--
-                    <button class="button celm-button" @click="nextRound" :disabled="ready">
-                        Next Round
-                    </button>
-                    <div v-if="ready">Waitting for the others players</div>
-                    -->
-                </div>
-                <div class="celm-gamePlayer" :class="{'is-active':user._id===activePlayerId}">
-                    <img src="../../../static/game/user.svg" alt="">
-                    {{user.username}}
-                </div>
+                <score-container
+                    class="celm-score"
+                    v-else-if="game.state===2"
+                    :players="game.playersCards"
+                    :matchs="game.score.matchs"
+                    :total="game.score.total"
+                    :ready="ready"
+                    @change="isReady()"
+                >
+                </score-container>
+                
+                <game-player
+                    :player="user"
+                    :activeId="activePlayerId"
+                >
+                </game-player>
+                {{socketId}}
             </div>
             <div class="celm-room--gameFooter">
             </div>
@@ -180,6 +144,8 @@ import {mapActions,mapState} from 'vuex'
 import Card from '../commons/Card'
 import ExtraScore from '../commons/ExtraScore'
 import ScoreContainer from '../commons/ScoreContainer'
+import GamePlayer from '../commons/GamePlayer'
+import PlayerCards from '../commons/PlayerCards'
 const debug = require('debug')('GAME ROOM => ')
 export default {
     name: 'Room',
@@ -195,22 +161,25 @@ export default {
         this.gameId=this.$route.params.gameId
         this.getGame({gameId:this.gameId})
     },
+    sockets:{
+        getid: function(id){
+            debug('socket connected',id)
+            this.setSocketId({socketId:id})
+        }
+    },
     components: {
         Card,
         ExtraScore,
-        ScoreContainer
+        ScoreContainer,
+        GamePlayer,
+        PlayerCards
     },
-    // events: {
-    //     readyChange: function (val) {
-    //         debug('readyChange', val)
-    //         this.ready=val
-    //     }
-    // },
     methods: {
         ...mapActions({
             getGame: 'match/GET_GAME',
             pushCard: 'match/PUSH_CARD',
-            setReady: 'match/SET_READY'
+            setReady: 'match/SET_READY',
+            setSocketId: 'match/SET_SOCKET_ID',
         }),
         isReady() {
             debug('chatching event')
@@ -244,7 +213,9 @@ export default {
                 return false
             return value > this.winnerCard.number
         },
-        
+        getPosition(id) {
+            return this.game.players.map( item => item._id.toString()).indexOf(id)
+        }
     },
     watch: {
         'game.state': function(newVal) {
@@ -260,6 +231,7 @@ export default {
             game: state => state.match.game,
             loading: state => state.match.fetchStatus === 'fetching',
             user: state => state.auth.user,
+            socketId: state => state.match.socketId
         }),
         mandatory() {
             return this.game.mandatoryCard
@@ -269,6 +241,9 @@ export default {
         },
         isYourTurn() {
             return this.activePlayerId === this.user._id && !this.loading 
+        },
+        position() {
+            return this.game && this.game.players &&  this.game.players.map( item => item._id.toString()).indexOf(this.user._id)
         },
         playerCards() {
             return this.game && this.game.playersCards && this.game.playersCards.filter(item=>item.id === this.user._id)[0].cards
@@ -437,34 +412,6 @@ export default {
                     display:none;
                 }
             }
-        }
-    }
-    .celm-score {
-        .cards-container {
-            // width:70%;
-        }
-        .total-score--container {
-            margin:1rem auto;
-        }
-        .total-score {
-            margin:0rem auto;
-            .player-cards {
-                border:$input-border;
-            }
-            &.is-head {
-                background-color:$button-bg-color;
-                color:$button-font-color;
-                font-weight:bold;
-            }
-        }
-        .player-score {
-            align-self: center;
-            font-weight:bold;
-        }
-        .cards-score {
-            align-self:center;
-            font-size:1.5rem;
-            color:darken($primary-color, 10);
         }
     }
 }

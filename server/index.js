@@ -5,15 +5,24 @@ const express = require('express'),
     mongoose = require('mongoose')
     config = require('./app/config/main')
 
+
+
+var server = require('http').Server(app);
+
+// const Socket = require('./socket.js')
+const io = require('socket.io')(server)
+// const io = socketIo.listen(server)
+const socketEvents = require('./app/socketEvents')
+
+socketEvents.set(io)
+socketEvents.initEvents()
+
 require('./app/bootstrap')(app)
 
 // Start the server
-const server = app.listen(config.port)
-const io = require('socket.io').listen(server)
-global.io = io
-
-console.log('Server running on port ' + config.port + '.')
-
+server.listen(config.port, function(){
+    console.log('Server running on port ' + config.port + '.')
+})
 
 // Enable CORS from client-side
 // app.use((req,res,next) => {
