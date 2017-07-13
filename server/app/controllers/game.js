@@ -163,7 +163,8 @@ exports.pushCard = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    io.emit('gameupdated', { game: game })
+    // io.emit('gameupdated', { game: game })
+    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
     //check if round is finish to collect cards and emit a new update event
     if(all) {
@@ -179,7 +180,8 @@ exports.pushCard = function*(req, res) {
             throw new res.exception.ErrorUpdating()
 
         setTimeout(()=>{
-            io.emit('gameupdated', { game: game })
+            // io.emit('gameupdated', { game: game })
+            game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
         }, reactionTime)
 
         //check if game is finished
@@ -224,7 +226,8 @@ exports.pushCard = function*(req, res) {
                 throw new res.exception.ErrorUpdating()
 
             setTimeout(()=>{
-                io.emit('gameupdated', { game: game })
+                // io.emit('gameupdated', { game: game })
+                game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
             }, reactionTime*1.5)
         
         }
@@ -294,9 +297,12 @@ exports.setPlayer = function*(req, res) {
         if(!gameSaved)
             throw new res.exception.ErrorUpdating()
 
+        //emit by id
+
     }
 
-    io.emit('gameupdated', { game: game })
+    //emit by id
+    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
     return {
             message:'user enter the game',
@@ -336,7 +342,8 @@ exports.setSocketId = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    io.emit('gameupdated', { game: game })
+    // io.emit('gameupdated', { game: game })
+    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
     return {
             
@@ -378,7 +385,8 @@ exports.setReady = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    io.emit('gameupdated', { game: game })
+    // io.emit('gameupdated', { game: game })
+    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
     return {
             
@@ -594,6 +602,11 @@ function nextRound(game) {
     game.markModified('desk')
     console.log('game.readyPlayers',game.readyPlayers)
     return game
+}
+
+function hideCards(player) {
+    player.cards = player.cards.map( item => { item.type = 'Empty', item.number=0 } )
+    return player
 }
 
 
