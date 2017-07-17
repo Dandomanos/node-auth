@@ -77,6 +77,9 @@ module.exports = app => {
     // Set Ready
     apiRoutes.post('/setReady', GameController.setReady)
 
+    // Set Ready
+    apiRoutes.post('/setExtraPoints', GameController.setExtraPoints)
+
     //=========================
     // Admin Routes
     //=========================

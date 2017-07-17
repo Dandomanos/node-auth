@@ -108,6 +108,15 @@
                                 :allowed="allowedCards"
                                 :yourTurn="isYourTurn"
                             ></card>
+                            <div class="sing-container" v-if="isYourTurn">
+                                <button
+                                    class="celm-button is-toolbar"
+                                    v-for="item in player.canSing"
+                                    @click="sing(item)"
+                                >
+                                    {{item.value}} en {{item.type}}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
@@ -122,7 +131,6 @@
                     @change="isReady()"
                 >
                 </score-container>
-                
                 <game-player
                     :player="user"
                     :activeId="activePlayerId"
@@ -157,9 +165,12 @@ export default {
             ready:false
         }
     },
-    mounted(){
+    async mounted(){
         this.gameId=this.$route.params.gameId
-        this.getGame({gameId:this.gameId})
+        await this.getGame({gameId:this.gameId})
+        if(this.socketId && this.socketId !== this.game.socketIds[this.position])
+            this.setSocketId({socketId:this.socketId})
+
     },
     sockets:{
         getid: function(id){
@@ -179,8 +190,14 @@ export default {
             getGame: 'match/GET_GAME',
             pushCard: 'match/PUSH_CARD',
             setReady: 'match/SET_READY',
+            setExtraPoints: 'match/SET_EXTRA_POINTS',
             setSocketId: 'match/SET_SOCKET_ID',
         }),
+        async sing(sing) {
+            debug('singing: ', sing)
+            await this.setExtraPoints({extraPoints:sing})
+            debug('extraPoints setted')
+        },
         isReady() {
             debug('chatching event')
             this.ready=true

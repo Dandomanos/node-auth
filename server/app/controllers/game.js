@@ -15,7 +15,7 @@ let players = {
 }
 
 let cardsByPlayer = {
-    0: 5,
+    0: 20,
 }
 
 let newState
@@ -350,6 +350,48 @@ exports.setSocketId = function*(req, res) {
     }
 }
 
+//========================================
+// SET SING EXTRA POINTS ON THE GAME
+//========================================
+exports.setExtraPoints = function*(req, res) {
+    let gameId = req.body.gameId
+    let extraPoint = req.body.extraPoint
+    let userId = req.user._id
+
+    if(!extraPoint)
+        throw new res.exception.UnknowParams()
+
+    let game = yield Game.findOne({ _id: gameId })
+    if(!game)
+        throw new res.exception.UnknowGame()
+
+    let popGame = yield User.populate(game, {path: "players"})
+    if(!popGame)
+        throw new res.exception.CantPopulateUsers()
+
+    let position = game.players.map(item=>item._id.toString()).indexOf(userId.toString())
+    if(position==-1)
+         throw new res.exception.YouAreNotInTheGame()
+
+    let canSingIndex = game.playersCards[position].canSing.map(item=> item.type).indexOf(extraPoint.type)
+    if(canSingIndex==-1)
+        throw new res.exception.YouCantSing()
+
+    game.playersCards[position].extraPoints.push(extraPoint)
+    game.playersCards[position].canSing = new Array()
+    game.markModified('playersCards')
+    
+    let saved = yield game.save()
+    if(!saved)
+        throw new res.exception.ErrorUpdating()
+
+    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+
+    return {
+            
+    }
+}
+
 
 //========================================
 // SET READY PLAYER IN A GAME
@@ -540,6 +582,10 @@ function isFinished(players) {
     return cards === 0
 }
 
+function getSongObj(type, triumph) {
+    return { type:type, value: triumph===type ? 40 : 20 }
+}
+
 function checkExtraPoints(players,position, triumphType) {
     let cards = players[position].cards.map( item=>item )
     let types = ['Oros','Copas','Espadas','Bastos']
@@ -547,41 +593,19 @@ function checkExtraPoints(players,position, triumphType) {
     let songs = cardsByType.map(item => item.filter(card => card.number === 12 || card.number === 11))
     let extraPoints = songs.filter(item => item.length>1)
     let extraTypes = extraPoints.map(item => item[0].type )
+    console.log('extraPoints',extraPoints)
     console.log('extraTypes',extraTypes)
-    if(extraTypes.length>0) {
-        let toSing =  extraTypes.filter(item => item === triumphType )
-        if(toSing.length) {
-            let itemToPush = {value:40, type:triumphType}
-            let Exist = players[position].extraPoints.map(item => item.type === itemToPush.type).indexOf(true)
-            console.log('Exist', Exist)
-            if(Exist===-1) {
-                players[position].extraPoints.push(itemToPush)
-                console.log('toSing 40', itemToPush)
-                return players
-            } else {
-                console.log('40 already singed')
-                extraTypes = extraTypes.splice(Exist, 1)
-            }
-        }
+    let alreadySinged = players[position].extraPoints.map(item => item.type)
+    extraTypes = extraTypes.filter( item => alreadySinged.indexOf(item) === -1 )
+    let canSing = extraTypes.map(item => getSongObj(item, triumphType) )
+    let can40 = canSing.filter(item => item.type===triumphType)
+    if(can40.length>=1)
+        canSing = can40
 
-        while(extraTypes.length>0) {
-
-            let itemToPush = {value:20, type:extraTypes[0]}
-            let Exist = players[position].extraPoints.map(item => item.type === itemToPush.type).indexOf(true)
-            if(Exist===-1) {
-                players[position].extraPoints.push(itemToPush)
-                console.log('toSing 20', itemToPush)
-                break
-            } else {
-                console.log('20 already singed',itemToPush)
-                if(extraTypes.length<=1)
-                    extraTypes = new Array()
-                else
-                    extraTypes.splice(Exist, 1)
-
-            }
-        }
-    }
+    console.log('can40', can40)
+    console.log('alreadySinged',alreadySinged)
+    console.log('canSing',canSing)
+    players[position].canSing = canSing
 
     return players
 }

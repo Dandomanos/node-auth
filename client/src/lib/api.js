@@ -210,6 +210,20 @@ export function setSocketId(token,gameId,socketId) {
     })
 }
 
+export function setExtraPoints(token,gameId,extraPoint) {
+    debug('request Token', extraPoint)
+    return request({
+        url:'/api/setExtraPoints',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            extraPoint
+        }
+    })
+}
+
+
 
 export function setReady(token,gameId) {
     debug('request Token', token)

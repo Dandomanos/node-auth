@@ -79,7 +79,18 @@ export default {
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)
             }
+        },
+        async SET_EXTRA_POINTS({commit,rootState,state},{extraPoints}) {
+            debug('extraPoints', extraPoints)
+            commit('FETCH_STARTED')
+            try {
+                await api.setExtraPoints(rootState.auth.token, state.game._id, extraPoints)
+                debug('set extraPoints')
+            } catch(err) {
+                commit('SET_FETCH_ERROR', err)
+            }
         }
+        // async SET_SING
     },
     getters:{
         game:state=>state.game

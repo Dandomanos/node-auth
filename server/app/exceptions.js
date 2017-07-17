@@ -112,6 +112,16 @@ const exceptionPool = new ExceptionPool({
         code:2020,
         message:'You are not in the game' ,
         statusCode:401
+    },
+    UnknowParams: {
+        code:2021,
+        message:'Wrong params' ,
+        statusCode:401
+    },
+    YouCantSing: {
+        code:2022,
+        message:'You cant sing this turn' ,
+        statusCode:401
     }
 })
 

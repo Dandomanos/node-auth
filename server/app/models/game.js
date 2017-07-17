@@ -120,6 +120,18 @@ const Game0Schema = new Schema({
                 // default:1
             }
         }],
+        canSing: [{
+            type: {
+                type:String,
+                enum: ['Oros','Copas', 'Espadas', 'Bastos'],
+                // default: 'Oros'
+            },
+            value: {
+                type: Number,
+                enum: [20,40],
+                // default:1
+            }
+        }],
     }],
     cardsByPlayer: {
         type: Number,
