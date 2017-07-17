@@ -111,25 +111,33 @@ const Game0Schema = new Schema({
         extraPoints: [{
             type: {
                 type:String,
-                enum: ['Monte','Oros','Copas', 'Espadas', 'Bastos'],
+                enum: ['Monte','Oros','Copas', 'Espadas', 'Bastos','Tute'],
                 // default: 'Oros'
             },
             value: {
                 type: Number,
-                enum: [10,20,40],
+                enum: [10,20,40,102],
                 // default:1
+            },
+            number: {
+                type: Number,
+                enum:[12,11]
             }
         }],
         canSing: [{
             type: {
                 type:String,
-                enum: ['Oros','Copas', 'Espadas', 'Bastos'],
+                enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Tute'],
                 // default: 'Oros'
             },
             value: {
                 type: Number,
-                enum: [20,40],
+                enum: [20,40,102],
                 // default:1
+            },
+            number: {
+                type: Number,
+                enum: [12,11],
             }
         }],
     }],

@@ -109,12 +109,18 @@
                                 :yourTurn="isYourTurn"
                             ></card>
                             <div class="sing-container" v-if="isYourTurn">
+                                
                                 <button
                                     class="celm-button is-toolbar"
                                     v-for="item in player.canSing"
                                     @click="sing(item)"
                                 >
-                                    {{item.value}} en {{item.type}}
+                                    <template v-if="item.type==='Tute'">
+                                        Tute de {{getTuteType(item.number)}}
+                                    </template>
+                                    <template v-else>
+                                        {{item.value}} en {{item.type}}
+                                    </template>
                                 </button>
                             </div>
                         </div>
@@ -162,6 +168,7 @@ export default {
             gameId:'',
             types : ['Oros','Copas','Espadas','Bastos'],
             values: [1,3,0],
+            tuteTypes: ['Reyes', 'Caballos'],
             ready:false
         }
     },
@@ -232,7 +239,10 @@ export default {
         },
         getPosition(id) {
             return this.game.players.map( item => item._id.toString()).indexOf(id)
-        }
+        },
+        getTuteType(number) {
+            return number === 12 ? this.tuteTypes[0] : this.tuteTypes[1]
+        } 
     },
     watch: {
         'game.state': function(newVal) {

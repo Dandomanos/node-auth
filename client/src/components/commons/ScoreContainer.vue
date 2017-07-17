@@ -15,21 +15,23 @@
         <div class="player-cards" v-for="(player, index) in players">
             <div class="columns is-mobile">
                 <h3 class="column player-score">Team {{index}}</h3>
-                <div class="cards-container column is-8">
-                    <card
-                        v-for="card in player.collectedCards"
-                        :type="card.type"
-                        :number="card.number"
-                        :key="card.number+card.type"
-                        :length="player.collectedCards.length"
-                        :disabled="true"
-                    ></card>
-                    <card
-                        v-if="player.collectedCards.length<=0"
-                        :type="'Empty'"
-                        :number="0"
-                        :disabled="true"
-                    ></card>
+                <div class="cards-container column is-8" >
+                    <div class="collectedCards" v-if="player.collectedCards.length>1">
+                        <card
+                            v-for="card in player.collectedCards"
+                            :type="card.type"
+                            :number="card.number"
+                            :key="card.number+card.type"
+                            :length="player.collectedCards.length"
+                            :disabled="true"
+                        ></card>
+                        <card
+                            v-if="player.collectedCards.length<=0"
+                            :type="'Empty'"
+                            :number="0"
+                            :disabled="true"
+                        ></card>
+                    </div>
                     <div class="extraPoints columns is-mobile">
                         <div class="column" v-for="extra in player.extraPoints">
                             {{extra.value}} en {{extra.type}}

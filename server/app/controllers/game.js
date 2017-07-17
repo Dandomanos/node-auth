@@ -15,10 +15,8 @@ let players = {
 }
 
 let cardsByPlayer = {
-    0: 20,
+    0: 30,
 }
-
-let newState
 
 //========================================
 // GET GAMES
@@ -37,7 +35,6 @@ exports.getGames = function*(req) {
 
         return { game: game }
     }
-        
 
     let games = yield Game.find( {} )
     if(!games)
@@ -149,10 +146,11 @@ exports.pushCard = function*(req, res) {
         console.log('mandatoryCard')
         game.mandatoryCard = card
     }
-    // game.markModified('mandatoryCard')
+
     game.markModified('playersCards')
-    let all = allPushed(game.playersCards)
+    
     //check if round is finish to set next active
+    let all = allPushed(game.playersCards)
     if(!all) {
         game.activePlayer = nextPlayer(game.activePlayer,game.playersCards)
     } else {
@@ -163,7 +161,6 @@ exports.pushCard = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    // io.emit('gameupdated', { game: game })
     game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
     //check if round is finish to collect cards and emit a new update event
@@ -172,7 +169,6 @@ exports.pushCard = function*(req, res) {
         //stop the game interactions
         game.activePlayer=-1
         game = finishRound(game)
-        game.mandatoryCard = {}
         game.markModified('playersCards')
 
         let saved = yield game.save()
@@ -180,7 +176,6 @@ exports.pushCard = function*(req, res) {
             throw new res.exception.ErrorUpdating()
 
         setTimeout(()=>{
-            // io.emit('gameupdated', { game: game })
             game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
         }, reactionTime)
 
@@ -226,7 +221,6 @@ exports.pushCard = function*(req, res) {
                 throw new res.exception.ErrorUpdating()
 
             setTimeout(()=>{
-                // io.emit('gameupdated', { game: game })
                 game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
             }, reactionTime*1.5)
         
@@ -234,12 +228,9 @@ exports.pushCard = function*(req, res) {
 
     }
 
-    return {
-        // gameId:gameId,
-        // card:card,
-        // userId: userId
-    }
+    return { }
 }
+
 //========================================
 // SET PLAYER IN A GAME
 //========================================
@@ -333,8 +324,6 @@ exports.setSocketId = function*(req, res) {
     if(position==-1)
          throw new res.exception.YouAreNotInTheGame()
     
-    console.log('position',position)
-    console.log('socketId',socketId)
     game.socketIds[position] = socketId
     game.markModified('socketIds')
     
@@ -342,7 +331,6 @@ exports.setSocketId = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    // io.emit('gameupdated', { game: game })
     game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
     return {
@@ -378,6 +366,55 @@ exports.setExtraPoints = function*(req, res) {
         throw new res.exception.YouCantSing()
 
     game.playersCards[position].extraPoints.push(extraPoint)
+
+    //check Tute
+    if(extraPoint.type === 'Tute') {
+        console.log('Tute, you should finish the game')
+
+        // remove extraPoints buttons
+        game.playersCards[position].canSing = new Array()
+        game.activePlayer=-1
+        game.markModified('playersCards')
+        let saved = yield game.save()
+        if(!saved)
+            throw new res.exception.ErrorUpdating()
+
+        game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+
+        //Finish game and add score
+        game.state = 2
+        let score = new Array(2)
+        score = [0,0]
+        score[position] = 102
+
+        game.score.matchs.push(score)
+
+        let maxValue = Math.max(...score)
+        let index = score.indexOf(maxValue)
+        let points = maxValue >= 102 ? 2 : 1
+
+        let newScore = [0,0]          
+        newScore[index] = points
+        game.score.total = game.score.total.map((item, index) => item + newScore[index])
+
+        game.playersCards = game.playersCards.map(item => clearCollected(item))
+        game.markModified('playersCards')
+        game.markModified('score')
+
+        let againSaved = yield game.save()
+        if(!againSaved)
+            throw new res.exception.ErrorUpdating()
+
+        setTimeout(()=>{
+            game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+        }, reactionTime*1.5)
+
+        return {}
+        
+        
+    }
+
+    
     game.playersCards[position].canSing = new Array()
     game.markModified('playersCards')
     
@@ -398,7 +435,6 @@ exports.setExtraPoints = function*(req, res) {
 //========================================
 exports.setReady = function*(req, res) {
     let gameId = req.body.gameId
-    // let position = req.body.position
     let userId = req.user._id
 
     //check if the place is free
@@ -411,11 +447,8 @@ exports.setReady = function*(req, res) {
         throw new res.exception.CantPopulateUsers()
 
     let playersId = game.players.map(item => item._id)
-    console.log('playersId',playersId)
     let index = game.players.map(item => item._id.toString()).indexOf(userId.toString())
-    console.log('index', index)
     game.readyPlayers[index] = 1
-    console.log('game.readyPlayers',game.readyPlayers)
 
     game.markModified('readyPlayers')
     let allConfirmed = game.readyPlayers.reduce((prev,cur)=>prev+cur,0) >= game.players.length
@@ -427,15 +460,14 @@ exports.setReady = function*(req, res) {
     if(!saved)
         throw new res.exception.ErrorUpdating()
 
-    // io.emit('gameupdated', { game: game })
     game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
 
-    return {
-            
-    }
+    return { }
 }
 
-//AUXILIAR FUNCTIONS
+//========================================
+// AUXILIAR FUNCTIONS
+//========================================
 
 function gameFull(players) {
     return players ? players.filter( item => item.role === 'Phantom' ).length <= 0 : false
@@ -470,8 +502,6 @@ function getQuery(path) {
 }
 
 function dealCards(game, total) {
-    // if(game && game.desk && game.players)
-    //     console.log('ready to deal')
     game.triumphCard = game.desk[game.desk.length-1]    
     game.playersCards = game.players.map( (item, index) =>  createPlayerCards(item._id, takeCards(game.desk, index*total, total)))
     game.desk = game.desk.filter( (item,index)=> index>game.playersCards.length*total)
@@ -551,11 +581,8 @@ function sortCards(cards) {
 
 function collectCards(players, winner) {
     let roundCards = players.map(item => item.pushedCard)
-    // console.log('roundCards', roundCards)
     players[winner].collectedCards = players[winner].collectedCards.concat(roundCards)
-    // console.log('collectedCards', players[winner].collectedCards)
     players = players.map(item => clearPushed(item) )
-    // console.log('round finished', players)
     return players
 }
 function clearPushed(item) {
@@ -564,7 +591,6 @@ function clearPushed(item) {
 }
 
 function finishRound(game) {
-    console.log('new round')
     //check who win the round
     let winner = checkWinner(game.playersCards, game.triumphCard, game.mandatoryCard)
     game.playersCards = collectCards(game.playersCards, winner)
@@ -572,6 +598,7 @@ function finishRound(game) {
 
     //check Winner extraPoints
     game.playersCards = checkExtraPoints(game.playersCards, winner, game.triumphCard.type)
+    game.mandatoryCard = {}
     return game
 }
 
@@ -589,22 +616,37 @@ function getSongObj(type, triumph) {
 function checkExtraPoints(players,position, triumphType) {
     let cards = players[position].cards.map( item=>item )
     let types = ['Oros','Copas','Espadas','Bastos']
-    let cardsByType = types.map(item => cards.filter(card => card.type === item))
-    let songs = cardsByType.map(item => item.filter(card => card.number === 12 || card.number === 11))
-    let extraPoints = songs.filter(item => item.length>1)
-    let extraTypes = extraPoints.map(item => item[0].type )
-    console.log('extraPoints',extraPoints)
-    console.log('extraTypes',extraTypes)
+    let numbers = [12, 11]
+
+    // check Tute
+    let tute = numbers.map(item => cards.filter(card => card.number === item))
+    let tuteObj = tute.filter(item => item.length>=4)
+
+    if(tuteObj.length>=1) {
+        console.log('can sing Tute on ', tuteObj[0][0].number )
+        let canSing = new Array()
+        canSing.push({ type: 'Tute', value:102, number:tuteObj[0][0].number})
+        players[position].canSing = canSing
+        return players
+    }
+
+
+    // check Sings
     let alreadySinged = players[position].extraPoints.map(item => item.type)
-    extraTypes = extraTypes.filter( item => alreadySinged.indexOf(item) === -1 )
+
+    let extraTypes = types.map(item => cards.filter(card => card.type === item))
+                          .map(item => item.filter(card => card.number === 12 || card.number === 11))
+                          .filter(item => item.length>1)
+                          .map(item => item[0].type )
+                          .filter( item => alreadySinged.indexOf(item) === -1 )
+
+    console.log('extraTypes',extraTypes)
+    
     let canSing = extraTypes.map(item => getSongObj(item, triumphType) )
     let can40 = canSing.filter(item => item.type===triumphType)
     if(can40.length>=1)
         canSing = can40
 
-    console.log('can40', can40)
-    console.log('alreadySinged',alreadySinged)
-    console.log('canSing',canSing)
     players[position].canSing = canSing
 
     return players
@@ -633,6 +675,11 @@ function hideCards(player) {
     return player
 }
 
+function clearCollected(item) {
+    if(item && item.collectedCards)
+        item.collectedCards = new Array()
 
+    return item
+}
 
 
