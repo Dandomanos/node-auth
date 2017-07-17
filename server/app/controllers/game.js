@@ -9,13 +9,14 @@ const io = require('../socketEvents').get()
 console.log(io)
 
 const reactionTime = 1500
+const finishMatchTime = 2500
 
 let players = {
     0: 2,
 }
 
 let cardsByPlayer = {
-    0: 30,
+    0: 6,
 }
 
 //========================================
@@ -156,79 +157,20 @@ exports.pushCard = function*(req, res) {
     } else {
         game.activePlayer=-1
     }
-
-    let saved = yield game.save()
-    if(!saved)
-        throw new res.exception.ErrorUpdating()
-
-    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+    yield saveAndReport(game)
 
     //check if round is finish to collect cards and emit a new update event
     if(all) {
-        console.log('round finished')
-        //stop the game interactions
-        game.activePlayer=-1
         game = finishRound(game)
-        game.markModified('playersCards')
 
-        let saved = yield game.save()
-        if(!saved)
-            throw new res.exception.ErrorUpdating()
-
-        setTimeout(()=>{
-            game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-        }, reactionTime)
+        yield saveAndReport(game,reactionTime)
 
         //check if game is finished
-        let finished = isFinished(game.playersCards)
-        if(finished) {
-            game.state = 2
-            console.log('finished game')
-
-            //Add final 10
-            game.playersCards[game.activePlayer].extraPoints.push({value:10, type:'Monte'})
-            let extraPoints = new Array(2)
-            extraPoints[0] = game.playersCards[0].extraPoints.map(item=>item.value)
-                .reduce((prev,cur) => prev + cur, 0)
-            extraPoints[1] = game.playersCards[1].extraPoints.map(item=>item.value)
-                .reduce((prev,cur) => prev + cur, 0)
-
-            console.log('extraPoints',extraPoints)
-
-            let score = new Array(2)
-            score[0] = game.playersCards[0].collectedCards.map(item=>getValue(item.number))
-            score[1] = game.playersCards[1].collectedCards.map(item=>getValue(item.number))
-            console.log('Score',score)
-
-            score[0] = score[0].reduce((prev,cur) => prev + cur, 0) + extraPoints[0]
-            score[1] = score[1].reduce((prev,cur) => prev + cur, 0) + extraPoints[1]
-            console.log('Score',score)
-            game.score.matchs.push(score)
-
-            let maxValue = Math.max(...score)
-            let index = score.indexOf(maxValue)
-            let points = maxValue >= 102 ? 2 : 1
-
-            let newScore = [0,0]          
-            newScore[index] = points
-            game.score.total = game.score.total.map((item, index) => item + newScore[index])
-
-
-            game.markModified('score')
-
-            let saved = yield game.save()
-            if(!saved)
-                throw new res.exception.ErrorUpdating()
-
-            setTimeout(()=>{
-                game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-            }, reactionTime*1.5)
-        
-        }
-
+        if(isFinished(game.playersCards))
+            yield saveAndReport(finishMatch(game),finishMatchTime)
     }
 
-    return { }
+    return {}
 }
 
 //========================================
@@ -276,24 +218,10 @@ exports.setPlayer = function*(req, res) {
         throw new res.exception.CantPopulateUsers()
 
     //check if game should start
-    if(game.state===0 && gameFull(game.players)) {
-        game.state=1
-        //create desk and deal cards
-        game.desk = new Desk()
-        console.log('game.type', game.type)
-        game = dealCards(game, cardsByPlayer[game.type])
-        game.activePlayer = 0
-        game.markModified('desk')
-        let gameSaved = yield game.save()
-        if(!gameSaved)
-            throw new res.exception.ErrorUpdating()
-
-        //emit by id
-
-    }
-
-    //emit by id
-    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+    if(game.state===0 && gameFull(game.players))
+        startNewGame(game)
+    else
+        yield saveAndReport(game)
 
     return {
             message:'user enter the game',
@@ -301,7 +229,6 @@ exports.setPlayer = function*(req, res) {
             games: games
     }
 }
-
 
 //========================================
 // SET SOCKETID ON THE GAM
@@ -327,15 +254,9 @@ exports.setSocketId = function*(req, res) {
     game.socketIds[position] = socketId
     game.markModified('socketIds')
     
-    let saved = yield game.save()
-    if(!saved)
-        throw new res.exception.ErrorUpdating()
+    yield saveAndReport(game)
 
-    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-
-    return {
-            
-    }
+    return {}
 }
 
 //========================================
@@ -369,64 +290,36 @@ exports.setExtraPoints = function*(req, res) {
 
     //check Tute
     if(extraPoint.type === 'Tute') {
-        console.log('Tute, you should finish the game')
 
-        // remove extraPoints buttons
+        // remove extraPoints buttons and block user
         game.playersCards[position].canSing = new Array()
         game.activePlayer=-1
         game.markModified('playersCards')
-        let saved = yield game.save()
-        if(!saved)
-            throw new res.exception.ErrorUpdating()
+        yield saveAndReport(game)
 
-        game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-
-        //Finish game and add score
+        //Finish game
         game.state = 2
-        let score = new Array(2)
-        score = [0,0]
+
+        //Add score
+        let score = [0,0]
         score[position] = 102
+        game = addScore(game, score)
 
-        game.score.matchs.push(score)
-
-        let maxValue = Math.max(...score)
-        let index = score.indexOf(maxValue)
-        let points = maxValue >= 102 ? 2 : 1
-
-        let newScore = [0,0]          
-        newScore[index] = points
-        game.score.total = game.score.total.map((item, index) => item + newScore[index])
-
+        //Clear Collected Cards
         game.playersCards = game.playersCards.map(item => clearCollected(item))
         game.markModified('playersCards')
-        game.markModified('score')
 
-        let againSaved = yield game.save()
-        if(!againSaved)
-            throw new res.exception.ErrorUpdating()
-
-        setTimeout(()=>{
-            game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-        }, reactionTime*1.5)
+        yield saveAndReport(game,finishMatchTime)
 
         return {}
-        
-        
     }
 
-    
     game.playersCards[position].canSing = new Array()
     game.markModified('playersCards')
     
-    let saved = yield game.save()
-    if(!saved)
-        throw new res.exception.ErrorUpdating()
+    yield saveAndReport(game)
 
-    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-
-    return {
-            
-    }
+    return {}
 }
 
 
@@ -456,13 +349,9 @@ exports.setReady = function*(req, res) {
     if(allConfirmed)
         game = nextRound(game)
 
-    let saved = yield game.save()
-    if(!saved)
-        throw new res.exception.ErrorUpdating()
+    yield saveAndReport(game)
 
-    game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
-
-    return { }
+    return {}
 }
 
 //========================================
@@ -599,6 +488,7 @@ function finishRound(game) {
     //check Winner extraPoints
     game.playersCards = checkExtraPoints(game.playersCards, winner, game.triumphCard.type)
     game.mandatoryCard = {}
+    game.markModified('playersCards')
     return game
 }
 
@@ -630,7 +520,6 @@ function checkExtraPoints(players,position, triumphType) {
         return players
     }
 
-
     // check Sings
     let alreadySinged = players[position].extraPoints.map(item => item.type)
 
@@ -650,6 +539,15 @@ function checkExtraPoints(players,position, triumphType) {
     players[position].canSing = canSing
 
     return players
+}
+
+function startNewGame(game) {
+    game.state=1
+    game.desk = new Desk()
+    game = dealCards(game, cardsByPlayer[game.type])
+    game.activePlayer = 0
+    game.markModified('desk')
+    yield saveAndReport(game)
 }
 
 function nextRound(game) {
@@ -682,4 +580,46 @@ function clearCollected(item) {
     return item
 }
 
+function addScore(game, score) {
+    game.score.matchs.push(score)
 
+    let maxValue = Math.max(...score)
+    let index = score.indexOf(maxValue)
+    let points = maxValue >= 102 ? 2 : 1
+
+    let newScore = [0,0]          
+    newScore[index] = points
+    game.score.total = game.score.total.map((item, index) => item + newScore[index])
+    game.markModified('score')
+
+    return game
+}
+
+function finishMatch(game) {
+    game.state = 2
+
+    //Add final 10
+    game.playersCards[game.activePlayer].extraPoints.push({value:10, type:'Monte'})
+    let extraPoints = [[],[]]
+    extraPoints = extraPoints.map((item, index) => game.playersCards[index].extraPoints.map(card=>card.value).reduce((prev,cur) => prev + cur, 0))
+
+    let score = [[],[]]
+    score = score.map((item, index) => game.playersCards[index].collectedCards.map(card=>getValue(card.number)).reduce((prev,cur) => prev + cur, 0) + extraPoints[index])
+
+    game = addScore(game, score)
+    return game
+}
+
+function* saveAndReport(game, delay) {
+    let saved = yield game.save()
+    if(!saved)
+        throw new res.exception.ErrorUpdating()
+
+    if(!delay)
+        game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+    else{
+        setTimeout(()=>{
+            game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
+        }, delay)
+    }
+}
