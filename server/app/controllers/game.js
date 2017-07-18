@@ -220,8 +220,8 @@ exports.setPlayer = function*(req, res) {
     //check if game should start
     if(game.state===0 && gameFull(game.players))
         startNewGame(game)
-    else
-        yield saveAndReport(game)
+
+    yield saveAndReport(game)
 
     return {
             message:'user enter the game',
@@ -547,7 +547,6 @@ function startNewGame(game) {
     game = dealCards(game, cardsByPlayer[game.type])
     game.activePlayer = 0
     game.markModified('desk')
-    yield saveAndReport(game)
 }
 
 function nextRound(game) {
