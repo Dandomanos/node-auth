@@ -16,8 +16,10 @@ let players = {
 }
 
 let cardsByPlayer = {
-    0: 6,
+    0: 20,
 }
+
+const exception = require('../exceptions')
 
 //========================================
 // GET GAMES
@@ -28,22 +30,22 @@ exports.getGames = function*(req) {
     if(query.game) {
         let game = yield Game.findOne( { _id: query.game} )
         if(!game)
-            throw new res.exception.UnknowGame()
+            throw new exception.UnknowGame()
 
         let gamePopulated = yield User.populate(game, {path: "players"})
         if(!gamePopulated)
-            throw new res.exception.CantPopulateUsers()
+            throw new exception.CantPopulateUsers()
 
         return { game: game }
     }
 
     let games = yield Game.find( {} )
     if(!games)
-        throw new res.exception.NoGamesCreated()
+        throw new exception.NoGamesCreated()
 
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     return {
             games:games
@@ -71,15 +73,15 @@ exports.createGame = function*(req, res) {
 
     let gameCreated = yield game.save()
     if(!gameCreated)
-        throw new res.exception.CreateGameFailed()
+        throw new exception.CreateGameFailed()
 
     let games = yield Game.find( {} )
     if(!games)
-        throw new res.exception.NoGamesCreated()
+        throw new exception.NoGamesCreated()
 
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
     
     io.emit('updated', { games: games })
 
@@ -96,15 +98,15 @@ exports.deleteGame = function*(req, res) {
     let gameId = req.body.gameId
     let deletedGame = yield Game.findOneAndRemove({_id:gameId})
     if(!deletedGame)
-        throw new res.exception.DeleteGameFailed()
+        throw new exception.DeleteGameFailed()
 
     let games = yield Game.find( {} )
     if(!games)
-        throw new res.exception.NoGamesCreated()
+        throw new exception.NoGamesCreated()
 
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
     
     io.emit('updated', { games: games })
     return {
@@ -123,11 +125,11 @@ exports.pushCard = function*(req, res) {
 
     let game = yield Game.findOne({ _id: gameId })
     if(!game)
-        throw new res.exception.UnknowGame()
+        throw new exception.UnknowGame()
 
     let popGame = yield User.populate(game, {path: "players"})
     if(!popGame)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     //check if this player can push a card
     let activePlayerId = game.players[game.activePlayer]._id
@@ -138,7 +140,7 @@ exports.pushCard = function*(req, res) {
             .filter(item => !compareCard(item, card))
 
     } else {
-        throw new res.exception.YouCantPlayNow()
+        throw new exception.YouCantPlayNow()
     }
 
     //check if it is the first card on the round
@@ -185,14 +187,14 @@ exports.setPlayer = function*(req, res) {
     //check if the place is free
     let game = yield Game.findOne({ _id: gameId })
     if(!game)
-        throw new res.exception.UnknowGame()
+        throw new exception.UnknowGame()
 
     let popGame = yield User.populate(game, {path: "players"})
     if(!popGame)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     if(game.players[position].role!=='Phantom')
-        throw new res.exception.Occupied()
+        throw new exception.Occupied()
 
     game.players[position] = userId
     game.socketIds[position] = socketId
@@ -201,21 +203,21 @@ exports.setPlayer = function*(req, res) {
 
     let saved = yield game.save()
     if(!saved)
-        throw new res.exception.ErrorUpdating()
+        throw new exception.ErrorUpdating()
 
     let games = yield Game.find( {} )
     if(!games)
-        throw new res.exception.NoGamesCreated()
+        throw new exception.NoGamesCreated()
 
     let populated = yield User.populate(games, {path: "players"})
     if(!populated)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
     
     io.emit('updated', { games: games })
 
     let gamePopulated = yield User.populate(game, {path: "players"})
     if(!gamePopulated)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     //check if game should start
     if(game.state===0 && gameFull(game.players))
@@ -241,15 +243,15 @@ exports.setSocketId = function*(req, res) {
     //check if the place is free
     let game = yield Game.findOne({ _id: gameId })
     if(!game)
-        throw new res.exception.UnknowGame()
+        throw new exception.UnknowGame()
 
     let popGame = yield User.populate(game, {path: "players"})
     if(!popGame)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     let position = game.players.map(item=>item._id.toString()).indexOf(userId.toString())
     if(position==-1)
-         throw new res.exception.YouAreNotInTheGame()
+         throw new exception.YouAreNotInTheGame()
     
     game.socketIds[position] = socketId
     game.markModified('socketIds')
@@ -268,23 +270,23 @@ exports.setExtraPoints = function*(req, res) {
     let userId = req.user._id
 
     if(!extraPoint)
-        throw new res.exception.UnknowParams()
+        throw new exception.UnknowParams()
 
     let game = yield Game.findOne({ _id: gameId })
     if(!game)
-        throw new res.exception.UnknowGame()
+        throw new exception.UnknowGame()
 
     let popGame = yield User.populate(game, {path: "players"})
     if(!popGame)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     let position = game.players.map(item=>item._id.toString()).indexOf(userId.toString())
     if(position==-1)
-         throw new res.exception.YouAreNotInTheGame()
+         throw new exception.YouAreNotInTheGame()
 
     let canSingIndex = game.playersCards[position].canSing.map(item=> item.type).indexOf(extraPoint.type)
     if(canSingIndex==-1)
-        throw new res.exception.YouCantSing()
+        throw new exception.YouCantSing()
 
     game.playersCards[position].extraPoints.push(extraPoint)
 
@@ -333,11 +335,11 @@ exports.setReady = function*(req, res) {
     //check if the place is free
     let game = yield Game.findOne({ _id: gameId })
     if(!game)
-        throw new res.exception.UnknowGame()
+        throw new exception.UnknowGame()
 
     let popGame = yield User.populate(game, {path: "players"})
     if(!popGame)
-        throw new res.exception.CantPopulateUsers()
+        throw new exception.CantPopulateUsers()
 
     let playersId = game.players.map(item => item._id)
     let index = game.players.map(item => item._id.toString()).indexOf(userId.toString())
@@ -612,7 +614,7 @@ function finishMatch(game) {
 function* saveAndReport(game, delay) {
     let saved = yield game.save()
     if(!saved)
-        throw new res.exception.ErrorUpdating()
+        throw new exception.ErrorUpdating()
 
     if(!delay)
         game.socketIds.map(item => io.to(item).emit('gameupdated', { game: game }))
