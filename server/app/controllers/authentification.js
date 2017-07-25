@@ -71,7 +71,7 @@ function getQuery(path) {
 //========================================
 exports.login = function*(req) {
 
-    console.log('req body', req.body)
+    // console.log('req body', req.body)
     let userInfo = setUserInfo(req.user)
 
     return {
@@ -99,10 +99,10 @@ exports.users = function*(req) {
 
     let users = yield User.find( {} )
     if(!users) {
-        console.log('users not found')
+        // console.log('users not found')
         throw new Error ('user not found')
     }
-    // console.log('users', users)
+    console.log('users', users)
     let usersInfo = users.map( user => setUserInfo(user))
     return {
         user: userInfo,
@@ -117,10 +117,10 @@ exports.users = function*(req) {
 exports.sendConfirmation = function*(req) {
     let email = req.user.email || null
     if(!email) {
-        console.log('Unknow user')
+        // console.log('Unknow user')
         throw new res.exception.UserNotFound()
     }
-    console.log('email', email)
+    // console.log('email', email)
 
     let user = yield User.findOne({ email: email })
 
@@ -136,7 +136,7 @@ exports.sendConfirmation = function*(req) {
         throw new res.exception.ShippingFailed()
     }
 
-    console.log('Email sent: ' + sended.response)
+    // console.log('Email sent: ' + sended.response)
     
     return {
         email:email,
@@ -167,7 +167,7 @@ exports.confirmEmail = function*(req, res) {
     if(!userSaved)
         throw new res.exception.ErrorUpdating()
 
-    console.log('Email confirmed', email)
+    // console.log('Email confirmed', email)
 
     return {
         token: token,
@@ -198,7 +198,7 @@ exports.adminUsers = (req, res, next) => {
 // Update Profile Route
 //========================================
 exports.updateProfile = function*(req, res, next) {
-    console.log('updating profile', req.body,req.user._id)
+    // console.log('updating profile', req.body,req.user._id)
     const firstName = req.body.firstName
     const lastName = req.body.lastName
     const username = req.body.username
@@ -217,7 +217,7 @@ exports.updateProfile = function*(req, res, next) {
 
     let updatedUser = yield User.findOneAndUpdate({ _id: req.user._id },{username:username,profile:{firstName:firstName,lastName:lastName}})
 
-    console.log('user updated', updatedUser)
+    // console.log('user updated', updatedUser)
     let user = setUserInfo(updatedUser)
     user.firstName = firstName
     user.lastName = lastName
@@ -233,7 +233,7 @@ exports.updateProfile = function*(req, res, next) {
 // Update Profile Route
 //========================================
 exports.changePassword = function*(req, res, next) {
-    console.log('updating profile', req.body,req.user._id)
+    // console.log('updating profile', req.body,req.user._id)
     const password = req.body.password
     const newPassword = req.body.newPassword
     const confirmed = req.body.confirmNewPassword
@@ -260,8 +260,8 @@ exports.changePassword = function*(req, res, next) {
     if (!matched)
         throw new res.exception.InvalidPassword()
 
-    console.log('matched', matched)
-    console.log('user', user)
+    // console.log('matched', matched)
+    // console.log('user', user)
     user.password = newPassword
     let userSaved = yield user.save()
 
@@ -279,7 +279,7 @@ exports.changePassword = function*(req, res, next) {
 // Generate new Password
 //========================================
 exports.recoverPass = function*(req, res, next) {
-    console.log('starting recovering pass', req.body)
+    // console.log('starting recovering pass', req.body)
     const email = req.body.email
 
     if(!email)
@@ -309,7 +309,7 @@ exports.recoverPass = function*(req, res, next) {
         throw new res.exception.ShippingFailed()
     }
 
-    console.log('Email sent: ' + sended.response)
+    // console.log('Email sent: ' + sended.response)
 
     return {
         message:'Password Generated Succesfully'
@@ -320,14 +320,14 @@ exports.recoverPass = function*(req, res, next) {
 //========================================
 exports.register = function*(req, res, next) {
     // Check for registration errors
-    console.log('starting register', req.body)
+    // console.log('starting register', req.body)
     const username = req.body.username
     const email = req.body.email
     const firstName = req.body.firstName
     const lastName = req.body.lastName
     const password = req.body.password
     const role = req.body.role
-    console.log('firstName', firstName)
+    // console.log('firstName', firstName)
 
     if(!username)
         throw new res.exception.UsernameNeeded()
@@ -354,7 +354,7 @@ exports.register = function*(req, res, next) {
     if(existingUser) {
         throw new res.exception.EmailUsed()
     }
-    console.log('firstName before created', firstName)
+    // console.log('firstName before created', firstName)
     let user = new User({
         emailActive:false,
         games: [],
@@ -365,11 +365,11 @@ exports.register = function*(req, res, next) {
         role: role
     })
 
-    console.log('creating user', user)
+    // console.log('creating user', user)
 
     let userSaved = yield user.save()
     let userInfo = setUserInfo(user)
-    console.log('user saved')
+    // console.log('user saved')
 
     //send email for confirmation
     let mailOptions = getConfirmOptions(email)
@@ -379,7 +379,7 @@ exports.register = function*(req, res, next) {
         throw new res.exception.ShippingFailed()
     }
 
-    console.log('Email sent: ' + sended.response)
+    // console.log('Email sent: ' + sended.response)
 
     return {
         token: 'JWT ' + generateToken(userInfo._id.toString()),
@@ -398,12 +398,12 @@ exports.roleAuthorization = role => {
         const user = req.user
         User.findById(user._id, (err, foundUser) => {
             if(err) {
-                console.log('error', err)
+                // console.log('error', err)
                 res.status(422).json({ error: 'No user was found'})
             }
 
             if(foundUser.role == role) {
-                console.log('foundUser.role', role)
+                // console.log('foundUser.role', role)
                 return next()
             }
 
@@ -415,6 +415,6 @@ exports.roleAuthorization = role => {
 
 
 exports.authenticationFail = (err,req,res,next)=>{
-    console.log('authentificationFail')
+    // console.log('authentificationFail')
     throw new res.exception.Unauthorized()
 }

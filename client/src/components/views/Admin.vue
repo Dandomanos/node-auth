@@ -14,12 +14,14 @@
                 <li v-for="game in games">
                     {{gameTypes[game.type]}}
                     <button class="delete" @click="deleteGame({gameId:game._id})"></button>
-                    <div class="player" v-for="n in game.players.length">
-                    <small v-if="game.players[n-1].role!=='Phantom'">
-                        <b>{{game.players[n-1].username}}</b>
-                    </small>
-                    <small v-else>Player {{n}}</small>
+                    
+                    <div class="player" v-for="n in game.players.length" v-if="game && game.players">
+                        <small v-if="game.players[n-1].role!=='Phantom'">
+                            <b>{{game.players[n-1].username}}</b>
+                        </small>
+                        <small v-else>Player {{n}}</small>
                     </div>
+                    
                 </li>
             </ul>
         </div>

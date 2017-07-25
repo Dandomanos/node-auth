@@ -1,11 +1,12 @@
+const debug = require('debug')('socketEvents')
 let ioClient
 module.exports = {
   initEvents() {
     ioClient.on('connection', (socket) => {
-      console.log('a user connected', socket.id)
+      debug('a user connected', socket.id)
 
       socket.on('updated', (games) => {
-        console.log('games updated')
+        debug('games updated')
         ioClient.sockets.in(games).emit('updated', games)
       })
 
@@ -14,12 +15,12 @@ module.exports = {
       // // On conversation entry, join broadcast channel
       // socket.on('enter conversation', (conversation) => {
       //   socket.join(conversation);
-      //   // console.log('joined ' + conversation);
+      //   // debug('joined ' + conversation);
       // });
 
       // socket.on('leave conversation', (conversation) => {
       //   socket.leave(conversation);
-      //   // console.log('left ' + conversation);
+      //   // debug('left ' + conversation);
       // })
 
       // socket.on('new message', (conversation) => {
@@ -27,7 +28,7 @@ module.exports = {
       //   });
 
       socket.on('disconnect', () => {
-        console.log('user disconnected', socket.id)
+        debug('user disconnected', socket.id)
       })
     })
   },

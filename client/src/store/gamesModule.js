@@ -60,7 +60,7 @@ export default {
             try {
                 let data = await api.createGame(type, rootState.auth.token)
                 debug('data', data)
-                commit('SET_GAMES', data.games)
+                commit('SET_GAMES', data.games.games)
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)                
             }
@@ -69,7 +69,7 @@ export default {
             commit('FETCH_STARTED')
             try {
                 let data = await api.deleteGame(gameId, rootState.auth.token)
-                commit('SET_GAMES', data.games)
+                commit('SET_GAMES', data.games.games)
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)
             }
