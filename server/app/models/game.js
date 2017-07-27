@@ -4,12 +4,15 @@ const mongoose = require('mongoose'),
 const Game = require('./game')
 const exception = require('../exceptions')
 const debug = require('debug')('GAME MODEL => ')
+const Desk = require('../controllers/game/Desk')
+const Cards = require('../controllers/game/Cards')
 debug.enabled = true
 //================================
 // Game Schema
 //================================
 // states: 0 => created, 1 => playing, 2=> scoring 3=>finished
-// types: 0 => Carta más alta
+// types: 0 => Tute
+
 const GameSchema = new Schema({
     type: {
         type: Number,
@@ -38,24 +41,24 @@ const GameSchema = new Schema({
     desk:[{
         type: {
             type:String,
-            enum: ['Oros','Copas', 'Espadas', 'Bastos'],
+            enum: Cards.types,
             default: 'Oros'
         },
         number: {
             type: Number,
-            enum: [1,2,3,4,5,6,7,10,11,12],
+            enum: Cards.numbers,
             default:1
         }
     }],
     triumphCard:{
         type: {
             type:String,
-            enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Empty'],
+            enum: Cards.typesEmpty,
             default: 'Empty'
         },
         number: {
             type: Number,
-            enum: [0,1,2,3,4,5,6,7,10,11,12],
+            enum: Cards.numbersEmpty,
             default:0
         },
         default:{}
@@ -63,12 +66,12 @@ const GameSchema = new Schema({
     mandatoryCard:{
         type: {
             type:String,
-            enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Empty'],
+            enum: Cards.typesEmpty,
             default: 'Empty'
         },
         number: {
             type: Number,
-            enum: [0,1,2,3,4,5,6,7,10,11,12],
+            enum: Cards.numbersEmpty,
             default:0
         },
         default:{}
@@ -78,24 +81,24 @@ const GameSchema = new Schema({
         cards: [{
             type: {
                 type:String,
-                enum: ['Oros','Copas', 'Espadas', 'Bastos'],
+                enum: Cards.types,
                 default: 'Oros'
             },
             number: {
                 type: Number,
-                enum: [1,2,3,4,5,6,7,10,11,12],
+                enum: Cards.numbers,
                 default:1
             }
         }],
         pushedCard: {
             type: {
                 type:String,
-                enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Empty'],
+                enum: Cards.typesEmpty,
                 default: 'Empty'
             },
             number: {
                 type: Number,
-                enum: [0,1,2,3,4,5,6,7,10,11,12],
+                enum: Cards.numbersEmpty,
                 default:0
             },
             default:{}
@@ -103,45 +106,45 @@ const GameSchema = new Schema({
         collectedCards: [{
             type: {
                 type:String,
-                enum: ['Oros','Copas', 'Espadas', 'Bastos'],
+                enum: Cards.types,
                 default: 'Oros'
             },
             number: {
                 type: Number,
-                enum: [1,2,3,4,5,6,7,10,11,12],
+                enum: Cards.numbers,
                 default:1
             }
         }],
         extraPoints: [{
             type: {
                 type:String,
-                enum: ['Monte','Oros','Copas', 'Espadas', 'Bastos','Tute'],
+                enum: Cards.typesExtra,
                 // default: 'Oros'
             },
             value: {
                 type: Number,
-                enum: [10,20,40,102],
+                enum: Cards.valuesExtra,
                 // default:1
             },
             number: {
                 type: Number,
-                enum:[12,11]
+                enum: Cards.numbersExtra
             }
         }],
         canSing: [{
             type: {
                 type:String,
-                enum: ['Oros','Copas', 'Espadas', 'Bastos', 'Tute'],
+                enum: Cards.typesSong,
                 // default: 'Oros'
             },
             value: {
                 type: Number,
-                enum: [20,40,102],
+                enum: Cards.valuesSong,
                 // default:1
             },
             number: {
                 type: Number,
-                enum: [12,11],
+                enum: Cards.numbersExtra,
             }
         }],
     }],
@@ -183,7 +186,11 @@ GameSchema.methods.createGame = function (type) {
     this.players = new Array(players[type])
     this.cardsByPlayer = cardsByPlayer[type]
     this.players = this.players.map(()=>mongoose.Types.ObjectId(phantomId))
-    return this
+}
+
+GameSchema.methods.checkMandatory = function(card) {
+    if(this.playersCards.filter(item => item.pushedCard.type==='Empty').length==this.playersCards.length-1)
+        this.mandatoryCard = card
 }
 
 GameSchema.methods.pushCard = function* (uid, card) {
@@ -198,9 +205,7 @@ GameSchema.methods.pushCard = function* (uid, card) {
         throw new exception.YouCantPlayNow()
     }
 
-    let mandatory = checkMandatory(this.playersCards)
-    if(mandatory)
-        this.mandatoryCard = card
+    this.checkMandatory(card)
 
 
     let all = this.allPushed()
@@ -218,37 +223,30 @@ GameSchema.methods.allPushed = function() {
 }
 
 GameSchema.methods.finishRound = function() {
-    //check who win the round
     let winner = this.checkWinner()
     this.collectCards(winner)
-    this.activePlayer = winner
-
-    //check Winner extraPoints
     this.checkExtraPoints(winner)
-    this.mandatoryCard = {}
-    this.markModified('playersCards')
 }
 
 GameSchema.methods.checkExtraPoints = function(position) {
     let cards = this.playersCards[position].cards.map( item=>item )
-    let types = ['Oros','Copas','Espadas','Bastos']
-    let numbers = [12, 11]
 
     // check Tute
-    let tute = numbers.map(item => cards.filter(card => card.number === item))
+    let tute = Cards.numbersExtra.map(item => cards.filter(card => card.number === item))
     let tuteObj = tute.filter(item => item.length>=4)
 
     if(tuteObj.length>=1) {
         let canSing = new Array()
         canSing.push({ type: 'Tute', value:102, number:tuteObj[0][0].number})
         this.playersCards[position].canSing = canSing
+        this.markModified('playersCards')
         return
     }
 
     // check Sings
     let alreadySinged = this.playersCards[position].extraPoints.map(item => item.type)
 
-    let extraTypes = types.map(item => cards.filter(card => card.type === item))
+    let extraTypes = Cards.types.map(item => cards.filter(card => card.type === item))
                           .map(item => item.filter(card => card.number === 12 || card.number === 11))
                           .filter(item => item.length>1)
                           .map(item => item[0].type )
@@ -260,6 +258,9 @@ GameSchema.methods.checkExtraPoints = function(position) {
         canSing = can40
 
     this.playersCards[position].canSing = canSing
+
+    this.mandatoryCard = {}
+    this.markModified('playersCards')
 
 }
 
@@ -282,6 +283,7 @@ GameSchema.methods.collectCards = function(winner) {
     let roundCards = this.playersCards.map(item => item.pushedCard)
     this.playersCards[winner].collectedCards = this.playersCards[winner].collectedCards.concat(roundCards)
     this.playersCards = this.playersCards.map(item => clearPushed(item) )
+    this.activePlayer = winner
 }
 GameSchema.methods.isFinished = function() {
     let cards = this.playersCards.map(item => item.cards.map(item=>item))
@@ -346,7 +348,6 @@ GameSchema.methods.startNewGame = function() {
     this.markModified('desk')
 }
 GameSchema.methods.dealCards = function() {
-    debug('cards by player', cardsByPlayer, '=>', cardsByPlayer[this.type])
     let total = cardsByPlayer[this.type]
     this.triumphCard = this.desk[this.desk.length-1]    
     this.playersCards = this.players.map( (item, index) =>  createPlayerCards(item._id, takeCards(this.desk, index*total, total)))
@@ -441,9 +442,7 @@ GameSchema.methods.nextRound = function() {
 }
 
 /* Auxiliar functions */
-function checkMandatory(players) {
-    return players.filter(item => item.pushedCard.type==='Empty').length==players.length-1
-}
+
 function compareCard(item, card) {
     return item.number === card.number && item.type === card.type
 }
@@ -501,27 +500,6 @@ function clearCollectedCards(item) {
         item.collectedCards = new Array()
 
     return item
-}
-
-class Desk {
-    constructor(){
-        this.types = ['Oros','Copas', 'Espadas', 'Bastos']
-        this.numbers = [1,2,3,4,5,6,7,10,11,12]
-        return this.createDesk()
-    }
-    createCard(number, type) {
-        return {
-            'number':number,
-            'type':type
-        }
-    }
-    createType(type) {
-        return this.numbers.map((number)=> this.createCard(number, type))
-    }
-    createDesk() {
-        // console.log('types', this.types)
-        return this.types.map((type)=>this.createType(type)).reduce((prev, cur) => prev.concat(cur), []).sort(() => (Math.random() - 0.5))
-    }
 }
 
 module.exports = mongoose.model('Game0', GameSchema)

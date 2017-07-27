@@ -7,6 +7,7 @@ const SO = new Emitter()
 const DB = new Db()
 
 const debug = require('debug')('GAME CONTROLLER => ')
+debug.enabled = true
 const reactionTime = 1500
 const finishMatchTime = 2500
 
@@ -27,9 +28,8 @@ exports.createGame = function*(req, res) {
     
     yield DB.saveGame(game)
 
-    let games = yield DB.getGames(req)
+    yield informGames(req)
 
-    SO.emitAll(games)
     return {
         message:'game created'
     }
@@ -42,9 +42,7 @@ exports.deleteGame = function*(req, res) {
 
     yield DB.deleteGame(req.body.gameId)
 
-    let games = yield DB.getGames(req)
-
-    SO.emitAll(games)
+    yield informGames(req)
 
     return {
         message: req.body.gameId + ' Deleted',
@@ -58,27 +56,25 @@ exports.deleteGame = function*(req, res) {
 exports.pushCard = function*(req, res) {
 
     let game = yield DB.getGame(req.body.gameId)
+
     yield game.pushCard(req.user._id, req.body.card)
 
-    yield DB.saveGame(game)
-    SO.emitPlayers(game)
+    yield saveAndInformPlayers(game)
 
     //check if round is finish to collect cards and emit a new update event
     if(game.allPushed()) {
         game.finishRound()
-        yield DB.saveGame(game)
-        SO.emitPlayers(game, reactionTime)
+        yield saveAndInformPlayers(game, reactionTime)
 
         //check if game is finished
         if(game.isFinished()) {
             game.finishMatch()
-            yield DB.saveGame(game)
-            SO.emitPlayers(game, finishMatchTime)
+            yield saveAndInformPlayers(game, finishMatchTime)
         }
     }
 
     return {
-        message:'Card pushed' + req.body.card
+        message:'Card pushed'
     }
 }
 
@@ -91,15 +87,15 @@ exports.setPlayer = function*(req, res) {
     game.setPlayer(req)
 
     yield DB.saveGame(game)
-    let games = yield DB.getGames(req)
-    SO.emitAll(games)
+
+    yield informGames(req)
 
     game = yield DB.getGame(req.body.gameId)
+
     if(game.isReady())
         game.startNewGame()
 
-    yield DB.saveGame(game)
-    SO.emitPlayers(game)
+    yield saveAndInformPlayers(game)
 
     return {
             message:'user enter the game',
@@ -116,8 +112,7 @@ exports.setSocketId = function*(req, res) {
     let game = yield DB.getGame(req.body.gameId)
     game.setSocketId(req)
 
-    yield DB.saveGame(game)
-    SO.emitPlayers(game)
+    yield saveAndInformPlayers(game)
 
     return {
         message:'socketId updated'
@@ -133,15 +128,14 @@ exports.setExtraPoints = function*(req, res) {
 
     game.setExtraPoints(req)
 
-    yield DB.saveGame(game)
-    SO.emitPlayers(game)
+    yield saveAndInformPlayers(game)
+
 
     if(req.body.extraPoint.type === 'Tute') {
 
         game.singTute(req)
 
-        yield DB.saveGame(game)
-        SO.emitPlayers(game,finishMatchTime)
+        yield saveAndInformPlayers(game,finishMatchTime)
 
     }
 
@@ -160,10 +154,20 @@ exports.setReady = function*(req, res) {
 
     game.setReady(req.user._id)
 
-    yield DB.saveGame(game)
-    SO.emitPlayers(game)
+    yield saveAndInformPlayers(game)
 
     return {
         message: 'Ready setted'
     }
+}
+
+
+/* Auxiliar functions */
+const saveAndInformPlayers = function*(game, delay) {
+    yield DB.saveGame(game)
+    SO.emitPlayers(game, delay)
+}
+const informGames = function*(req) {
+    let games = yield DB.getGames(req)
+    SO.emitAll(games)
 }
