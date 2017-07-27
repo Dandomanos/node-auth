@@ -130,7 +130,6 @@ exports.setExtraPoints = function*(req, res) {
 
     yield saveAndInformPlayers(game)
 
-
     if(req.body.extraPoint.type === 'Tute') {
 
         game.singTute(req)
