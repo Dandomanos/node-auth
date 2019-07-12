@@ -68,6 +68,18 @@ module.exports = app => {
     // Set Player
     apiRoutes.post('/setPlayer', GameController.setPlayer)
 
+    // Push Card
+    apiRoutes.post('/pushCard', GameController.pushCard)
+
+    // Set SocketId
+    apiRoutes.post('/setSocketId', GameController.setSocketId)
+
+    // Set Ready
+    apiRoutes.post('/setReady', GameController.setReady)
+
+    // Set Ready
+    apiRoutes.post('/setExtraPoints', GameController.setExtraPoints)
+
     //=========================
     // Admin Routes
     //=========================

@@ -14,12 +14,14 @@
                 <li v-for="game in games">
                     {{gameTypes[game.type]}}
                     <button class="delete" @click="deleteGame({gameId:game._id})"></button>
-                    <div class="player" v-for="n in game.players.length">
-                    <small v-if="game.players[n-1].role!=='Phantom'">
-                        <b>{{game.players[n-1].username}}</b>
-                    </small>
-                    <small v-else>Player {{n}}</small>
+                    
+                    <div class="player" v-for="n in game.players.length" v-if="game && game.players">
+                        <small v-if="game.players[n-1].role!=='Phantom'">
+                            <b>{{game.players[n-1].username}}</b>
+                        </small>
+                        <small v-else>Player {{n}}</small>
                     </div>
+                    
                 </li>
             </ul>
         </div>
@@ -86,7 +88,7 @@ export default {
         },
         ...mapState({
             users: state => state.users.users,
-            games: state => state.game.games
+            games: state => state.games.games
         }) 
     },
     methods: {
@@ -97,9 +99,9 @@ export default {
         },
         ...mapActions({
             getUsers:'users/GET_USERS',
-            newGame:'game/CREATE_GAME',
-            getGames:'game/GET_GAMES',
-            deleteGame: 'game/DELETE_GAME'
+            newGame:'games/CREATE_GAME',
+            getGames:'games/GET_GAMES',
+            deleteGame: 'games/DELETE_GAME'
         })
     },
     mounted(){

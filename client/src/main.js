@@ -6,6 +6,13 @@ import router from './router'
 import store from './store'
 import {sync} from 'vuex-router-sync'
 
+//socket io
+import socketio from 'socket.io-client'
+import VueSocketIO from 'vue-socket.io'
+export const SocketInstance = socketio('http://localhost:3000')
+Vue.use(VueSocketIO, SocketInstance, store)
+
+
 Vue.config.productionTip = false
 
 sync(store, router)

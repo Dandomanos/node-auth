@@ -10,6 +10,7 @@ import Game from '@/components/views/Game.vue'
 import Admin from '@/components/views/Admin.vue'
 import Recover from '@/components/views/Recover.vue'
 import EmailConfirmation from '@/components/views/EmailConfirmation.vue'
+import Room from '@/components/views/Room'
 
 Vue.use(Router)
 
@@ -70,6 +71,12 @@ const router = new Router({
             path: '/admin',
             name: 'Admin',
             component: Admin,
+            meta:{requiredAuth:true}
+        },
+        {
+            path: '/room/:gameId',
+            name: 'Room',
+            component: Room,
             meta:{requiredAuth:true}
         },
         {

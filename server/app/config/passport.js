@@ -12,11 +12,11 @@ const expressDeliver = require('express-deliver')
 
 // Setting up local login strategy
 const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
-    console.log('email', email, password)
+    // console.log('email', email, password)
     User.findOne( {email: email} , (err, user) => {
         if(err) { return done(err) }
         if(!user) {
-            console.log('user not found')
+            // console.log('user not found')
             return done(new exception.InvalidEmailPassword())
         }
 

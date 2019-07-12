@@ -1,29 +1,21 @@
 
 const Game = require('../models/game')
-const User = require('../models/user')
-const config = require('../config/main')
-const expressDeliver = require('express-deliver')
-const mongoose = require('mongoose')
 
-let players = {
-    0: 2
-}
+const Db = require('./game/Db')
+const Emitter = require('./game/Emitter')
+const SO = new Emitter()
+const DB = new Db()
+
+const debug = require('debug')('GAME CONTROLLER => ')
+debug.enabled = true
+const reactionTime = 1500
+const finishMatchTime = 2500
 
 //========================================
 // GET GAMES
 //========================================
 exports.getGames = function*(req) {
-    let games = yield Game.find( {} )
-    if(!games)
-        throw new res.exception.NoGamesCreated()
-
-    let populated = yield User.populate(games, {path: "players"})
-    if(!populated)
-        throw new res.exception.CantPopulateUsers()
-
-    return {
-            games:games
-    }
+    return yield DB.getGames(req)
 }
 
 //========================================
@@ -31,34 +23,15 @@ exports.getGames = function*(req) {
 //========================================
 exports.createGame = function*(req, res) {
 
-    let type = req.body.type
-    console.log('type of game', type)
+    let game = new Game()
+    game.createGame(req.body.type)
     
-    let game = new Game({
-        type:type,
-        players: new Array(players[type])
-    })
+    yield DB.saveGame(game)
 
-    //create phantoms user
-    game.players = game.players.map(()=>mongoose.Types.ObjectId('595b701b07770e46038c5877'))
-
-    console.log('creating game', game)
-
-    let gameCreated = yield game.save()
-    if(!gameCreated)
-        throw new res.exception.CreateGameFailed()
-
-    let games = yield Game.find( {} )
-    if(!games)
-        throw new res.exception.NoGamesCreated()
-
-    let populated = yield User.populate(games, {path: "players"})
-    if(!populated)
-        throw new res.exception.CantPopulateUsers()
+    yield informGames(req)
 
     return {
-            message:'game created',
-            games:games
+        message:'game created'
     }
 }
 
@@ -66,22 +39,42 @@ exports.createGame = function*(req, res) {
 // DELETE GAME
 //========================================
 exports.deleteGame = function*(req, res) {
-    let gameId = req.body.gameId
-    let deletedGame = yield Game.findOneAndRemove({_id:gameId})
-    if(!deletedGame)
-        throw new res.exception.DeleteGameFailed()
 
-    let games = yield Game.find( {} )
-    if(!games)
-        throw new res.exception.NoGamesCreated()
+    yield DB.deleteGame(req.body.gameId)
 
-    let populated = yield User.populate(games, {path: "players"})
-    if(!populated)
-        throw new res.exception.CantPopulateUsers()
+    yield informGames(req)
 
     return {
-        message: gameId + ' Deleted',
+        message: req.body.gameId + ' Deleted',
         games:games
+    }
+}
+
+//========================================
+// PUSH CARD
+//========================================
+exports.pushCard = function*(req, res) {
+
+    let game = yield DB.getGame(req.body.gameId)
+
+    yield game.pushCard(req.user._id, req.body.card)
+
+    yield saveAndInformPlayers(game)
+
+    //check if round is finish to collect cards and emit a new update event
+    if(game.allPushed()) {
+        game.finishRound()
+        yield saveAndInformPlayers(game, reactionTime)
+
+        //check if game is finished
+        if(game.isFinished()) {
+            game.finishMatch()
+            yield saveAndInformPlayers(game, finishMatchTime)
+        }
+    }
+
+    return {
+        message:'Card pushed'
     }
 }
 
@@ -89,41 +82,20 @@ exports.deleteGame = function*(req, res) {
 // SET PLAYER IN A GAME
 //========================================
 exports.setPlayer = function*(req, res) {
-    let gameId = req.body.gameId
-    let position = req.body.position
-    let userId = req.user._id
-    console.log('gameId', gameId)
-    console.log('position', position)
-    console.log('userId', userId)
 
-    //check if the place is free
-    let game = yield Game.findOne({ _id: gameId })
-    if(!game)
-        throw new res.exception.UnknowGame()
+    let game = yield DB.getGame(req.body.gameId)
+    game.setPlayer(req)
 
-    let popGame = yield User.populate(game, {path: "players"})
-    if(!popGame)
-        throw new res.exception.CantPopulateUsers()
+    yield DB.saveGame(game)
 
-    if(game.players[position].role!=='Phantom')
-        throw new res.exception.Occupied()
+    yield informGames(req)
 
-    game.players[position] = userId
-    game.markModified('players')
+    game = yield DB.getGame(req.body.gameId)
 
-    let saved = yield game.save()
-    if(!saved)
-        throw new res.exception.ErrorUpdating()
+    if(game.isReady())
+        game.startNewGame()
 
- 
-
-    let games = yield Game.find( {} )
-    if(!games)
-        throw new res.exception.NoGamesCreated()
-
-    let populated = yield User.populate(games, {path: "players"})
-    if(!populated)
-        throw new res.exception.CantPopulateUsers()
+    yield saveAndInformPlayers(game)
 
     return {
             message:'user enter the game',
@@ -132,4 +104,69 @@ exports.setPlayer = function*(req, res) {
     }
 }
 
+//========================================
+// SET SOCKETID ON THE GAM
+//========================================
+exports.setSocketId = function*(req, res) {
 
+    let game = yield DB.getGame(req.body.gameId)
+    game.setSocketId(req)
+
+    yield saveAndInformPlayers(game)
+
+    return {
+        message:'socketId updated'
+    }
+}
+
+//========================================
+// SET SING EXTRA POINTS ON THE GAME
+//========================================
+exports.setExtraPoints = function*(req, res) {
+
+    let game = yield DB.getGame(req.body.gameId)
+
+    game.setExtraPoints(req)
+
+    yield saveAndInformPlayers(game)
+
+    if(req.body.extraPoint.type === 'Tute') {
+
+        game.singTute(req)
+
+        yield saveAndInformPlayers(game,finishMatchTime)
+
+    }
+
+    return {
+        message:'Extra Points setted'
+    }
+}
+
+
+//========================================
+// SET READY PLAYER IN A GAME
+//========================================
+exports.setReady = function*(req, res) {
+
+    let game = yield DB.getGame(req.body.gameId)
+
+    game.setReady(req.user._id)
+
+    yield saveAndInformPlayers(game)
+
+    return {
+        message: 'Ready setted'
+    }
+}
+
+
+/* Auxiliar functions */
+const saveAndInformPlayers = function*(game, delay) {
+    yield DB.saveGame(game)
+    SO.emitPlayers(game, delay)
+}
+const informGames = function*(req) {
+    let games = yield DB.getGames(req)
+    SO.emitAll(games)
+}

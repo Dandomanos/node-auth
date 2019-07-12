@@ -9,7 +9,8 @@
                         <h3>{{gameTypes[game.type]}}</h3>
                         <small>{{game._id}}</small>
                     </div>
-                    <div class="columns is-mobile">
+                    <div class="columns is-mobile" v-if="game.players.length===2">
+                        
                         <button
                             class="button celm-player-button box column is-6"
                             v-for="n in game.players.length"
@@ -22,6 +23,45 @@
                             <small v-if="game.players[n-1].role!=='Phantom'">{{game.players[n-1].username}}</small>
                             <small v-else>Player {{n}}</small>
                         </button>
+                    </div>
+                    <div v-else="game.players.length===4" class="tile is-ancestor is-vertical">
+                        <div class="tile is-parent">
+
+                            <div class="tile is-child is-4">
+                            <!-- player 2 -->
+                                <button
+                                    class="button celm-player-button box"
+                                    :class="{'freePlace': game.players[1].role==='Phantom'}"
+                                    @click="enterGame(game._id, 1)"
+                                    :disabled="game.players[1].role!=='Phantom'"
+                                    >
+                                    
+                                    <img src="../../../static/game/user.svg" alt="">
+                                    <small v-if="game.players[1].role!=='Phantom'">{{game.players[1].username}}</small>
+                                    <small v-else>Player {{2}}</small>
+                                </button>
+                            </div>
+
+
+                        </div>
+                        <div class="tile is-parent">
+                            <div class="tile is-child is-4">
+                            player 1
+                            </div>
+                            <div class="tile is-child is-4">
+                            </div>
+                            <div class="tile is-child is-4">
+                            player 3
+                            </div>
+                        </div>
+                        <div class="tile is-parent">
+                            
+                            <div class="tile is-child is-4">
+                            player 4
+                            </div>
+                            
+                        </div>
+
                     </div>
                 </div>
             </li>
@@ -56,12 +96,14 @@ import {mapState, mapActions} from 'vuex'
 import Card from '../commons/Card'
 import FormMessagesHandler from '../commons/FormMessagesHandler'
 import FormValidatorMixin from '../../mixins/FormValidatorMixin.js'
+import TablePlayer from '../commons/TablePlayer'
 const debug = require('debug')('GAME => ')
 export default {
     name: 'Game',
     components: {
         Card,
-        FormMessagesHandler
+        FormMessagesHandler,
+        TablePlayer
     },
     mixins: [FormValidatorMixin],
     data () {
@@ -87,23 +129,24 @@ export default {
         },
         ...mapActions({
             sendEmail:'auth/SEND_CONFIRMATION_EMAIL',
-            getGames:'game/GET_GAMES',
-            setPlayer:'game/SET_PLAYER'
+            getGames:'games/GET_GAMES',
+            setPlayer:'games/SET_PLAYER'
         }),
-        enterGame(gameId, position) {
+        async enterGame(gameId, position) {
             let data = {
                 gameId:gameId,
                 position:position
             }
             debug('gameId',gameId)
-            this.setPlayer(data) 
+            this.setPlayer(data)
+            await this.$router.replace({name:'Room', params: {gameId:gameId}}) 
         }
 
     },
     computed: {
         ...mapState({
             user: state => state.auth.user,
-            games: state => state.game.games
+            games: state => state.games.games
         }),
     },
     mounted() {
@@ -129,6 +172,9 @@ export default {
         &[disabled]{
             opacity:1;
         }
+    }
+    .tile.is-child.is-4 {
+        margin:0 auto!important;
     }
 }
 .celm-game {

@@ -175,15 +175,16 @@ export function getUser(token) {
     })
 }
 
-export function getGames(token) {
-    debug('request Token', token)
+export function getGames(token, gameId) {
+    debug('gameId', gameId)
+    let query = gameId ? '?game=' + gameId : ''
     return request({
-        url:'/api/games',
+        url:'/api/games'+query,
         token
     })
 }
 
-export function setPlayer(gameId,position,token) {
+export function setPlayer(gameId,position,token,socketId) {
     debug('request Token', token)
     return request({
         url:'/api/setPlayer',
@@ -191,7 +192,60 @@ export function setPlayer(gameId,position,token) {
         token,
         data: {
             gameId,
-            position
+            position,
+            socketId
+        }
+    })
+}
+export function setSocketId(token,gameId,socketId) {
+    debug('request Token', token)
+    return request({
+        url:'/api/setSocketId',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            socketId
+        }
+    })
+}
+
+export function setExtraPoints(token,gameId,extraPoint) {
+    debug('request Token', extraPoint)
+    return request({
+        url:'/api/setExtraPoints',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            extraPoint
+        }
+    })
+}
+
+
+
+export function setReady(token,gameId) {
+    debug('request Token', token)
+    return request({
+        url:'/api/setReady',
+        method: 'POST',
+        token,
+        data: {
+            gameId
+        }
+    })
+}
+
+export function pushCard(token, gameId, card) {
+    debug('gameId', gameId)
+    return request({
+        url:'/api/pushCard',
+        method: 'POST',
+        token,
+        data: {
+            gameId,
+            card
         }
     })
 }

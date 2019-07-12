@@ -1,12 +1,13 @@
 import * as api from '../lib/api'
-const debug = require('debug')('USERS-DATA')
+const debug = require('debug')('GAMES-MODULE')
 
 export default {
     namespaced:true,
     state: {
         fetchStatus:null,
         fetchError:null,
-        games:null
+        games:null,
+        connected:false
     },
     mutations: {
         FETCH_STARTED(state) {
@@ -20,6 +21,14 @@ export default {
         SET_FETCH_ERROR(state, error) {
             state.fetchStatus = 'failed'
             state.fetchError = error && error.data
+        },
+        SOCKET_CONNECT: (state) => {
+            debug('Socket Connected')
+            state.connected = true
+        },
+        SOCKET_UPDATED: (state, games) => {
+            debug('Socket updated', games)
+            state.games = games.games
         }
     },
     actions: {
@@ -39,7 +48,7 @@ export default {
             debug('gameId', gameId)
             try {
                 debug('token from rootState', rootState.auth.token)
-                let data = await api.setPlayer(gameId,position,rootState.auth.token)
+                let data = await api.setPlayer(gameId,position,rootState.auth.token,rootState.match.socketId)
                 // debug('games',data.games)
                 commit('SET_GAMES', data.games)
             } catch(err){
@@ -51,7 +60,7 @@ export default {
             try {
                 let data = await api.createGame(type, rootState.auth.token)
                 debug('data', data)
-                commit('SET_GAMES', data.games)
+                commit('SET_GAMES', data.games.games)
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)                
             }
@@ -60,7 +69,7 @@ export default {
             commit('FETCH_STARTED')
             try {
                 let data = await api.deleteGame(gameId, rootState.auth.token)
-                commit('SET_GAMES', data.games)
+                commit('SET_GAMES', data.games.games)
             } catch(err) {
                 commit('SET_FETCH_ERROR', err)
             }

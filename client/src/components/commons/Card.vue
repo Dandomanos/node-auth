@@ -1,29 +1,43 @@
 <template>
-    <div class="cardContainer" :class="{'isHidden':isHidden}">
+    <button class="button cardContainer" :style="containerStyle" @click="submit()" :disabled="!isAllowed">
         <div class="card">
-            <div class="bg-card" :style="style"></div>  
+            <div class="bg-card" :style="cardStyle"></div>  
             <span>{{number}} de {{type}}</span>
         </div>
-    </div>
+    </button>
 </template>
 
 <script>
+// const debug = require('debug')('card')
 export default {
     name: 'Card',
-    props:['type', 'number'],
+    props:['type', 'number','isHidden','length','action','allowed','yourTurn'],
     data () {
         return {
-            isHidden:false,
+            // isHidden:false,
         }
     },
     computed: {
-        style() {
-            return {backgroundImage: 'url(../../static/desk/'+ this.number + '-' + this.type +'.jpg)'}
-            // return {backgroundColor: 'red'}
+        url() {
+            return this.isHidden ?'url(../../static/desk/hiddenCard.svg)' : 'url(../../static/desk/'+ this.number + '-' + this.type +'.jpg)'
+        },
+        maxWidth() {
+            return (100/this.length) + '%'
+        },
+        cardStyle() {
+            return this.type !== 'Empty' ? {backgroundImage: this.url} : {}
+        },
+        containerStyle() {
+            return {maxWidth:this.maxWidth}
+        },
+        isAllowed() {
+            return this.allowed && this.allowed.length && this.yourTurn && this.allowed.filter( item => item.type === this.type && item.number === this.number).length>0
         }
     },
     methods: {
-        
+        submit() {
+            this.action({card:{type:this.type, number:this.number}})   
+        }
     }
 }
 </script>
@@ -33,6 +47,20 @@ export default {
     width:$card-width;
     padding:$card-air;
     display:inline-block;
+    border:none;
+    height: auto;
+    &[disabled] {
+        opacity:1;
+    }
+    &.isHidden {
+        .card {
+            //add background for hide card
+            background-color:blue;
+            .bg-card, span {
+                display:none;
+            }
+        }
+    }
 }
 .card {
     background-color:white;
@@ -42,12 +70,8 @@ export default {
     border:$card-border;
     overflow:hidden;
     position:relative;
-    &.isHidden {
-        //add background for hide card
-        background-color:blue;
-        .bg-card {
-            display:none;
-        }
+    span {
+        display:none;
     }
     .bg-card {
         position:absolute;
